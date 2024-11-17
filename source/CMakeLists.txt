@@ -13,10 +13,12 @@ add_executable(${TARGET_NAME} main.cpp ${SOURCE_FILES} ${HEADER_FILES})
 
 set(THIRD_PARTY_DIR "${CMAKE_SOURCE_DIR}/3rdparty")
 set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
-set(GLFW_INCLUDE ${THIRD_PARTY_DIR}/glfw-3.4/include)
+set(GLM_INCLUDE "${THIRD_PARTY_DIR}/glm")
+set(GLFW_ROOT "${THIRD_PARTY_DIR}/GLFW-VS2022")
 
-target_link_libraries(${TARGET_NAME} PUBLIC glfw)
+target_link_libraries(${TARGET_NAME} PUBLIC "${GLFW_ROOT}/lib/glfw3.lib" glm)
 target_include_directories(${TARGET_NAME} PUBLIC $<BUILD_INTERFACE:${THIRD_PARTY_DIR}>)
 target_include_directories(${TARGET_NAME} PUBLIC $<BUILD_INTERFACE:${INCLUDE_DIR}>)
-target_include_directories(${TARGET_NAME} PUBLIC $<BUILD_INTERFACE:${GLFW_INCLUDE}>)
+target_include_directories(${TARGET_NAME} PUBLIC $<BUILD_INTERFACE:${GLFW_ROOT}/include>)
+target_include_directories(${TARGET_NAME} PUBLIC $<BUILD_INTERFACE:${GLM_INCLUDE}>)
 
