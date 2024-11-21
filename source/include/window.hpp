@@ -3,8 +3,7 @@
 #include <GLFW/glfw3.h>
 #include <memory>
 #include <shader.hpp>
-#include <scene.hpp>
-#include <framebuffer.hpp>
+#include <frame_buffer.hpp>
 
 class Window
 {

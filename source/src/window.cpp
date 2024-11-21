@@ -1,19 +1,21 @@
 #include "Window.hpp"
-#include <iostream>
-#include <framebuffer.hpp>
 #include <wtypes.h>
+#include <algorithm>
+#include <frame_buffer.hpp>
+#include <iostream>
+#include <render.hpp>
 
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 
-Window::Window(size_t width, size_t height, const char *title)
-    : width_(width), height_(height), title_(title)
-{
+#include <glm/gtc/matrix_transform.hpp>
+
+Window::Window(size_t width, size_t height, const char* title)
+    : width_(width), height_(height), title_(title) {
     init();
 }
 
-void Window::drawFrameBuffer(const FrameBuffer &fb)
-{
+void Window::drawFrameBuffer(const FrameBuffer& fb) {
     HWND hwnd = glfwGetWin32Window(window_.get());
     HDC hdcWindow = GetDC(hwnd);
     if (!hdcWindow) {
@@ -31,9 +33,9 @@ void Window::drawFrameBuffer(const FrameBuffer &fb)
     BITMAPINFO bmi{};
     bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
     bmi.bmiHeader.biWidth = width;
-    bmi.bmiHeader.biHeight = -height; // 使用负值表示自上而下的 DIB
+    bmi.bmiHeader.biHeight = -height;  // 使用负值表示自上而下的 DIB
     bmi.bmiHeader.biPlanes = 1;
-    bmi.bmiHeader.biBitCount = 24; // 每像素 24 位
+    bmi.bmiHeader.biBitCount = 24;  // 每像素 24 位
     bmi.bmiHeader.biCompression = BI_RGB;
 
     // 创建 DIB Section
@@ -50,7 +52,7 @@ void Window::drawFrameBuffer(const FrameBuffer &fb)
     if (!hdcMemory) {
         DeleteObject(hbm);
         ReleaseDC(hwnd, hdcWindow);
-        std::cerr << "Failed to create compatible DC" << std::endl;
+        std::cerr << "Failed to create compatible DC\n";
         return;
     }
     HGDIOBJ oldObject = SelectObject(hdcMemory, hbm);
@@ -77,20 +79,38 @@ void Window::drawFrameBuffer(const FrameBuffer &fb)
     ReleaseDC(hwnd, hdcWindow);
 }
 
-void Window::run()
-{
-    // todo: loade scene
+void Window::run() {
+    // load model
+    std::unique_ptr<Model> model = std::make_unique<Model>(R"(D:\code\ZBufRender\asserts)", "box.obj");
+    model->modelInfo();
 
-    while (!glfwWindowShouldClose(window_.get()))
-    {
-        FrameBuffer fb(width_, height_);
-        for (size_t y = 0; y < fb.getHeight(); ++y)
-        {
-            for (size_t x = 0; x < fb.getWidth(); ++x)
-            {
-                fb.setPixel(x, y, glm::vec3(1.0f, 0.f, 0.0f));
-            }
-        }
+    // init fb
+    FrameBuffer fb(width_, height_);
+
+    // set MVP
+    glm::mat4 M = glm::mat4(1.0f);
+    glm::mat4 V = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f),
+                              glm::vec3(0.0f),
+                              glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::mat4 P = glm::perspective(glm::radians(45.0f),
+                                   static_cast<float>(width_) / static_cast<float>(height_),
+                                   0.1f,
+                                   100.0f);
+    // set Uniforms
+    Uniforms uniforms{M, V, P,
+                      static_cast<int>(width_),
+                      static_cast<int>(height_)};
+
+    // set shader
+    Shader shader(vertexShader, fragmentShader);
+
+    // render loop
+    while (!glfwWindowShouldClose(window_.get())) {
+        //fb.clear();
+
+        Render render{};
+        // draw
+        render.draw(fb, uniforms, shader, model);
 
         drawFrameBuffer(fb);
         glfwPollEvents();
@@ -98,25 +118,21 @@ void Window::run()
     glfwTerminate();
 }
 
-void Window::init()
-{
-
+void Window::init() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // 不使用 OpenGL
+    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);  // 不使用 OpenGL
 
-    if (!glfwInit())
-    {
+    if (!glfwInit()) {
         std::cerr << "Failed to initialize GLFW" << std::endl;
         exit(EXIT_FAILURE);
     }
 
     window_.reset(glfwCreateWindow(static_cast<int>(width_), static_cast<int>(height_), title_, nullptr, nullptr));
-    if (!window_)
-    {
+    if (!window_) {
         glfwTerminate();
-        std::cerr << "Failed to create GLFW window" << std::endl;
+        std::cerr << "Failed to create GLFW window\n";
         exit(EXIT_FAILURE);
     }
 
