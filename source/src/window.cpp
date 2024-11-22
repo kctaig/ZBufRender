@@ -1,14 +1,18 @@
+#include <GLFW/glfw3.h> 
+
 #include "Window.hpp"
 #include <wtypes.h>
 #include <algorithm>
-#include <frame_buffer.hpp>
 #include <iostream>
 #include <render.hpp>
 
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
-
 #include <glm/gtc/matrix_transform.hpp>
+#include <gl/GL.h>
+
+
+Window::curContext Window::context{};
 
 Window::Window(size_t width, size_t height, const char* title)
     : width_(width), height_(height), title_(title) {
@@ -81,8 +85,8 @@ void Window::drawFrameBuffer(const FrameBuffer& fb) {
 
 void Window::run() {
     // load model
-    std::unique_ptr<Model> model = std::make_unique<Model>(R"(D:\code\ZBufRender\asserts)", "box.obj");
-    model->modelInfo();
+    std::unique_ptr<Model> model = std::make_unique<Model>(R"(D:\code\ZBufRender\asserts)", "cube.obj");
+    //model->modelInfo();
 
     // init fb
     FrameBuffer fb(width_, height_);
@@ -97,9 +101,16 @@ void Window::run() {
                                    0.1f,
                                    100.0f);
     // set Uniforms
-    Uniforms uniforms{M, V, P,
+    uniforms = Uniforms{M, V, P,
                       static_cast<int>(width_),
                       static_cast<int>(height_)};
+
+    context.fb = &fb;
+    context.curHeight = &height_;
+    context.curWidth = &width_;
+	context.uniforms = &uniforms;
+
+    Render render{};
 
     // set shader
     Shader shader(vertexShader, fragmentShader);
@@ -108,21 +119,39 @@ void Window::run() {
     while (!glfwWindowShouldClose(window_.get())) {
         //fb.clear();
 
-        Render render{};
         // draw
         render.draw(fb, uniforms, shader, model);
 
-        drawFrameBuffer(fb);
+        // 设置像素操作参数
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        //drawFrameBuffer(fb);
+
+        glDrawPixels(uniforms.screenWidth, uniforms.screenHeight, GL_RGB, GL_UNSIGNED_BYTE, fb.getScreenBuffer()->data());
+        //glfwSwapInterval(1);
+        glfwSwapBuffers(window_.get());
+
         glfwPollEvents();
     }
     glfwTerminate();
 }
 
+void Window::framebufferCallback(GLFWwindow* window, int width, int height)
+{
+	*context.curHeight = height;
+    *context.curWidth = width;
+	context.fb->reCreate(width, height,glm::vec3(1,0,1));
+	context.uniforms->screenWidth = width;
+	context.uniforms->screenHeight = height;
+
+    glm::mat4 P = glm::perspective(glm::radians(45.0f),
+        static_cast<float>(width) / static_cast<float>(height),
+        0.1f,
+        100.0f);
+	context.uniforms->projection = P;
+}
+
+
 void Window::init() {
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);  // 不使用 OpenGL
 
     if (!glfwInit()) {
         std::cerr << "Failed to initialize GLFW" << std::endl;
@@ -137,4 +166,11 @@ void Window::init() {
     }
 
     glfwMakeContextCurrent(window_.get());
+
+    //if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+    //    std::cerr << "Failed to initialize GLAD" << std::endl;
+    //    exit(EXIT_FAILURE);
+    //}
+
+    glfwSetFramebufferSizeCallback(window_.get(), framebufferCallback);
 }

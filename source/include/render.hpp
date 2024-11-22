@@ -16,9 +16,8 @@ class Render {
               const Shader& shader,
               const std::unique_ptr<Model>& model);
     void rasterization(FrameBuffer& fb,
-                       const Shader& shader,
-                       const Uniforms& uniforms,
-                       const FragMesh& fragMesh);
+                        const Shader& shader,
+                        const Uniforms& uniforms);
     BBOX getBBox() const { return bbox; }
     void setBBox(const BBOX& bbox) { this->bbox = bbox; }
 
@@ -26,6 +25,10 @@ class Render {
         const FragMesh& fragMesh,
         const glm::vec2& screenPoint);
 
+	FragMesh* getFragMesh() const { return fragMesh; }
+
    private:
     BBOX bbox;
+    FragMesh* fragMesh = new FragMesh{ std::vector<glm::vec4>(3),3 };
+
 };

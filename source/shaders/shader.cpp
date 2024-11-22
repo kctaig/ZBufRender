@@ -10,12 +10,12 @@ glm::vec4 vertexShader(const Vertex& vertex, const Uniforms& uniforms) {
     glm::vec4 NDC = clipPos / w;
     NDC.w = 1.f / w;
     glm::vec4 fragPos = NDC;
-    fragPos.x = (NDC.x + 1.f) * .5f * uniforms.screenWight;
+    fragPos.x = (NDC.x + 1.f) * .5f * uniforms.screenWidth;
     fragPos.y = (NDC.y + 1.f) * .5f * uniforms.screenHeight;
 
     return fragPos;
 }
 
 glm::vec3 fragmentShader(const glm::vec4& fragPos, const Uniforms& uniforms) {
-    return glm::vec3(1.f);
+    return glm::vec3(0,0,1);
 }

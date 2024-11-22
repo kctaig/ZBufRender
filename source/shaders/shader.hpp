@@ -3,9 +3,10 @@
 #include <glm/glm.hpp>
 #include <model.hpp>
 #include <memory>
+#include <vector>
 
 struct FragMesh {
-    std::unique_ptr<glm::vec4[]> screenMesh;
+    std::vector<glm::vec4> screenMesh;
     size_t vertexNum;
 };
 
@@ -14,7 +15,7 @@ struct Uniforms {
     glm::mat4 view;
     glm::mat4 projection;
 
-    int screenWight, screenHeight;
+    int screenWidth, screenHeight;
 };
 
 class Shader {

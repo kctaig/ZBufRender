@@ -19,6 +19,8 @@ public:
     size_t getWidth() const { return width_; }
     size_t getHeight() const { return height_; }
 
+    static void framebufferCallback(GLFWwindow* window, int width, int height);
+
 private:
     size_t width_, height_;
     const char *title_;
@@ -26,4 +28,15 @@ private:
         nullptr, glfwDestroyWindow};
 
     void init();
+
+    Uniforms uniforms;
+
+    struct curContext{
+        FrameBuffer* fb;
+        size_t* curHeight;
+        size_t* curWidth;
+		Uniforms* uniforms;
+    };
+
+	static curContext context;
 };

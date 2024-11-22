@@ -2,7 +2,7 @@
  
 int main()
 {
-    Window window{800, 600, "ZBufRender"};
+    Window window{200, 200, "ZBufRender"};
     window.run();
     return 0;
 }
