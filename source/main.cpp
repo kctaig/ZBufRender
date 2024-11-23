@@ -1,8 +1,8 @@
-#include "Window.hpp"
- 
+#include "application.hpp"
+
 int main()
 {
-    Window window{200, 200, "ZBufRender"};
-    window.run();
+    Application app{};
+    app.run();
     return 0;
 }

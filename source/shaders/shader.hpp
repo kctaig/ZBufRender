@@ -15,11 +15,18 @@ struct Uniforms {
     glm::mat4 view;
     glm::mat4 projection;
 
-    int screenWidth, screenHeight;
+	int screenWidth;
+	int screenHeight;
+
+    Uniforms(const glm::mat4& m, const glm::mat4& v, const glm::mat4& p, int h, int w)
+        : model(m), view(v), projection(p), screenHeight(h), screenWidth(w) {}
 };
 
 class Shader {
    public:
+       Shader() = default;
+       ~Shader() = default;
+
     using vertexShader = glm::vec4 (*)(const Vertex&, const Uniforms&);
     using fragmentShader = glm::vec3 (*)(const glm::vec4&, const Uniforms&);
 

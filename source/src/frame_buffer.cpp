@@ -1,50 +1,41 @@
 #include <frame_buffer.hpp>
 
 FrameBuffer::FrameBuffer(size_t width, size_t height)
-    : width_(width),
-      height_(height),
-      pixelCount_(width * height) {
-    depthBuffer_ = std::make_unique<float[]>(pixelCount_);
-    colorBuffer_ = std::make_unique<std::vector<glm::vec3>>(pixelCount_);
-	screenBuffer_ = std::make_shared<std::vector<glm::u8vec3>>(pixelCount_);
+    : width(width),
+      height(height),
+      pixelCount(width * height) {
+    depthBuffer = std::make_unique<std::vector<float>>(pixelCount);
+    colorBuffer = std::make_unique<std::vector<glm::vec3>>(pixelCount);
+	screenBuffer = std::make_unique<std::vector<glm::u8vec3>>(pixelCount);
     clear(glm::vec3(0));
 }
 
 void FrameBuffer::clear(const glm::vec3 &color) {
-    std::fill(depthBuffer_.get(), depthBuffer_.get() + pixelCount_, 1.0f);
-    (*colorBuffer_).assign(pixelCount_, color);
+	(*depthBuffer).assign(pixelCount, 1.f);
+    (*colorBuffer).assign(pixelCount, color);
 }
 
 size_t FrameBuffer::getIndex(const size_t x, const size_t y) const {
-    try {
-        if (x >= width_ || y >= height_) {
-            throw std::out_of_range("FrameBuffer x or y out of range");
-        }
-    } catch (std::out_of_range& e) {
-        std::cerr << e.what() << std::endl;
-        exit(EXIT_FAILURE);
-    }
-    return y * width_ + x;
+    return y * width + x;
 }
 
-void FrameBuffer::reCreate(size_t width, size_t height,const glm::vec3 & color)
+void FrameBuffer::reCreate(size_t w, size_t h,const glm::vec3 & color)
 {
-	width_ = width;
-	height_ = height;
-	pixelCount_ = width * height;
-	depthBuffer_ = std::make_unique<float[]>(pixelCount_);
-	colorBuffer_->resize(pixelCount_);
-	screenBuffer_->resize(pixelCount_);
+	width = w;
+	height = h;
+	pixelCount = w * h;
+	depthBuffer->resize(pixelCount);
+	colorBuffer->resize(pixelCount);
+	screenBuffer->resize(pixelCount);
 	clear(color);
 }
 
-const std::shared_ptr<std::vector<glm::u8vec3>>& FrameBuffer::getScreenBuffer()
+const std::unique_ptr<std::vector<glm::u8vec3>>& FrameBuffer::getScreenBuffer()
 {
-    for (size_t i = 0; i < pixelCount_;i++) {
-		glm::vec3 color = (*colorBuffer_)[i];
+    for (size_t i = 0; i < pixelCount;i++) {
+		glm::vec3 color = (*colorBuffer)[i];
 		glm::u8vec3 color_u8 = static_cast<glm::u8vec3>(color * 255.f);
-        (*screenBuffer_)[i] = color_u8;
+        (*screenBuffer)[i] = color_u8;
     }
-	return screenBuffer_;
-
+	return screenBuffer;
 }

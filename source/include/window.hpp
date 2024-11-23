@@ -1,42 +1,40 @@
 #pragma once
 
 #include <GLFW/glfw3.h>
-#include <memory>
-#include <shader.hpp>
 #include <frame_buffer.hpp>
+#include <shader.hpp>
 
-class Window
-{
-public:
-    Window(size_t width, size_t height, const char *title);
+struct curContext {
+    FrameBuffer* fb;
+    Uniforms* uniforms;
+};
+
+class Window {
+   public:
+    Window() = default;
     ~Window() = default;
 
-    Window(const Window &) = delete;
-    Window &operator=(const Window &) = delete;
-    void drawFrameBuffer(const FrameBuffer &fb);
-    void run();
+    Window(const Window&) = delete;
+    Window& operator=(const Window&) = delete;
 
-    size_t getWidth() const { return width_; }
-    size_t getHeight() const { return height_; }
+    Window(size_t width, size_t height, const char* title);
+
+    void drawFrameBuffer(const FrameBuffer& fb);
+
+    size_t getWidth() const { return width; }
+    size_t getHeight() const { return height; }
+    GLFWwindow* getWindowPtr() { return window.get(); }
 
     static void framebufferCallback(GLFWwindow* window, int width, int height);
+	curContext& getContext() { return context; }
 
-private:
-    size_t width_, height_;
-    const char *title_;
-    std::unique_ptr<GLFWwindow, decltype(&glfwDestroyWindow)> window_{
-        nullptr, glfwDestroyWindow};
+   private:
+    size_t width, height;
+    const char* title;
+    std::unique_ptr<GLFWwindow, decltype(&glfwDestroyWindow)> window{
+        nullptr, glfwDestroyWindow };
+
+    static curContext context;
 
     void init();
-
-    Uniforms uniforms;
-
-    struct curContext{
-        FrameBuffer* fb;
-        size_t* curHeight;
-        size_t* curWidth;
-		Uniforms* uniforms;
-    };
-
-	static curContext context;
 };

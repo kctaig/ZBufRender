@@ -15,10 +15,13 @@ class Render {
               Uniforms& uniforms,
               const Shader& shader,
               const std::unique_ptr<Model>& model);
+
     void rasterization(FrameBuffer& fb,
                         const Shader& shader,
                         const Uniforms& uniforms);
+
     BBOX getBBox() const { return bbox; }
+
     void setBBox(const BBOX& bbox) { this->bbox = bbox; }
 
     glm::vec3 calculateWeights(
