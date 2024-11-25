@@ -18,14 +18,14 @@ class Model {
     Model() = default;
     ~Model() = default;
 
-    Model(std::vector<Mesh> triangles, std::vector<Vertex> vertices)
+    Model(const std::vector<Mesh>& triangles, const std::vector<Vertex>& vertices)
         : triangles(triangles), vertices(vertices) {}
     Model(std::string dirPath, std::string fileName);
 
-    std::vector<Mesh> getTriangles() const { return triangles; }
-    std::vector<Vertex> getVertices() const { return vertices; }
-    void setVertices(std::vector<Vertex> vertices) { this->vertices = vertices; }
-    void setTriangles(std::vector<Mesh> triangles) { this->triangles = triangles; }
+    const std::vector<Mesh>& getTriangles() const { return triangles; }
+    const std::vector<Vertex>& getVertices() const { return vertices; }
+    void setVertices(const std::vector<Vertex>& vertices) { this->vertices = vertices; }
+    void setTriangles(const std::vector<Mesh>& triangles) { this->triangles = triangles; }
 
     void modelInfo();
 

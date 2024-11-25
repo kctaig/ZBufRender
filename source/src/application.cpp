@@ -1,29 +1,35 @@
 #include <application.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <chrono>
 
 void Application::run() {
+   
     // render loop
     while (!glfwWindowShouldClose(window->getWindowPtr())) {
 
-        // draw
-        render->draw(*framebuffer, *uniforms, *shader, model);
+        auto start = std::chrono::high_resolution_clock::now();
+
+        render->processTriangles(*framebuffer, *uniforms, *shader, model, true);
 
         // 设置像素操作参数
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        // drawFrameBuffer(fb);
 
         glDrawPixels(framebuffer->getWidth(), framebuffer->getHeight(), GL_RGB, GL_UNSIGNED_BYTE, framebuffer->getScreenBuffer()->data());
         glfwSwapInterval(1);
         glfwSwapBuffers(window->getWindowPtr());
 
         glfwPollEvents();
+
+        auto end = std::chrono::high_resolution_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        std::cout << "Execution time: " << duration << " ms" << std::endl;
     }
     glfwTerminate();
 }
 
 void Application::init() {
     size_t width = 800, height = 600;
-    model = std::make_unique<Model>(R"(D:\code\ZBufRender\asserts)", "box.obj");
+    model = std::make_unique<Model>(R"(D:\code\ZBufRender\asserts)", "bunny.obj");
     window = std::make_unique<Window>(width, height, "ZBufRender");
     shader = std::make_unique<Shader>(vertexShader, fragmentShader);
     render = std::make_unique<Render>();
@@ -31,7 +37,7 @@ void Application::init() {
     
     // set uniforms and context
     glm::mat4 M = glm::mat4(1.0f);
-    glm::mat4 V = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f),
+    glm::mat4 V = glm::lookAt(glm::vec3(0.0f, 0.0f, 7.0f),
                               glm::vec3(0.0f),
                               glm::vec3(0.0f, 1.0f, 0.0f));
 

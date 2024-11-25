@@ -11,27 +11,25 @@ class Render {
        Render() = default;
 	   ~Render() = default;
 
-    void draw(FrameBuffer& fb,
+    void processTriangles(FrameBuffer& fb,
               Uniforms& uniforms,
               const Shader& shader,
-              const std::unique_ptr<Model>& model);
+              const std::unique_ptr<Model>& model, 
+              bool useParallel = true);
+
+    // ÒÑ·ÏÆú
+    void Render::draw(FrameBuffer& fb,
+        Uniforms& uniforms,
+        const Shader& shader,
+        const std::unique_ptr<Model>& model);
 
     void rasterization(FrameBuffer& fb,
                         const Shader& shader,
-                        const Uniforms& uniforms);
-
-    BBOX getBBox() const { return bbox; }
-
-    void setBBox(const BBOX& bbox) { this->bbox = bbox; }
+                        const Uniforms& uniforms,
+                        const FragMesh& fragMesh);
 
     glm::vec3 calculateWeights(
         const FragMesh& fragMesh,
         const glm::vec2& screenPoint);
-
-	FragMesh* getFragMesh() const { return fragMesh; }
-
-   private:
-    BBOX bbox;
-    FragMesh* fragMesh = new FragMesh{ std::vector<glm::vec4>(3),3 };
 
 };

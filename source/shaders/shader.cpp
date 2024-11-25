@@ -7,6 +7,9 @@ glm::vec4 vertexShader(const Vertex& vertex, const Uniforms& uniforms) {
 
     // fragment pos
     float w = clipPos.w;
+    if (w == 0.0f) {
+        return glm::vec4(0.0f); 
+    }
     glm::vec4 NDC = clipPos / w;
     NDC.w = 1.f / w;
     glm::vec4 fragPos = NDC;
@@ -17,5 +20,5 @@ glm::vec4 vertexShader(const Vertex& vertex, const Uniforms& uniforms) {
 }
 
 glm::vec3 fragmentShader(const glm::vec4& fragPos, const Uniforms& uniforms) {
-    return glm::vec3(0,0,1);
+    return glm::vec3(1,1,1);
 }

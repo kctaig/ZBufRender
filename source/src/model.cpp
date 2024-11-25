@@ -24,7 +24,7 @@ Model::Model(std::string dirPath, std::string fileName) {
     auto& shapes = reader.GetShapes();
     auto& materials = reader.GetMaterials();
 
-    // 添加模型的顶点
+    // add model vertices
     for (size_t i = 0; i < attrib.vertices.size(); i += 3) {
         glm::vec3 v_pos = glm::vec3(attrib.vertices[i], attrib.vertices[i + 1], attrib.vertices[i + 2]);
         Vertex* v = new Vertex();
@@ -35,7 +35,7 @@ Model::Model(std::string dirPath, std::string fileName) {
     // 将模型数据保存到Model中
     for (size_t i = 0; i < shapes.size(); i++) {
         size_t mesh_vertex_offset = 0;                              // 面片顶点偏移量
-        size_t mesh_num = shapes[i].mesh.num_face_vertices.size();  // 面片数量
+        size_t mesh_num = shapes[i].mesh.num_face_vertices.size();
         for (size_t m = 0; m < mesh_num; m++) {
             std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>();
             size_t each_mesh_vertex_num = shapes[i].mesh.num_face_vertices[m];
@@ -59,18 +59,18 @@ Model::Model(std::string dirPath, std::string fileName) {
 }
 
 void Model::modelInfo() {
-    // 调试信息
+    // print model info
     std::cout << "# of vertices  : " << (this->vertices.size()) << std::endl;
     std::cout << "# of meshes   : " << (this->triangles.size()) << std::endl;
 
-    // 打印顶点
+    // print vertices
     std::cout << "start print vertices: \n";
     for (size_t j = 0; j < this->vertices.size(); j++) {
         Vertex v = this->vertices[j];
         std::cout << v.pos[0] << " " << v.pos[1] << " " << v.pos[2] << std::endl;
     }
 
-    // 打印mesh
+    // print mesh
     std::cout << "start print meshes: \n";
     for (size_t j = 0; j < this->triangles.size(); j++) {
         std::cout << "mesh " << j << " : ";
