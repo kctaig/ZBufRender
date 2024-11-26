@@ -14,22 +14,25 @@ struct Mesh {
 };
 
 class Model {
-   public:
+public:
     Model() = default;
+
     ~Model() = default;
 
-    Model(const std::vector<Mesh>& triangles, const std::vector<Vertex>& vertices)
-        : triangles(triangles), vertices(vertices) {}
-    Model(std::string dirPath, std::string fileName);
+    Model(const std::vector<Mesh> &triangles, const std::vector<Vertex> &vertices)
+        : triangles(triangles), vertices(vertices) {
+    }
 
-    const std::vector<Mesh>& getTriangles() const { return triangles; }
-    const std::vector<Vertex>& getVertices() const { return vertices; }
-    void setVertices(const std::vector<Vertex>& vertices) { this->vertices = vertices; }
-    void setTriangles(const std::vector<Mesh>& triangles) { this->triangles = triangles; }
+    Model(const std::string &dirPath, const std::string &fileName);
 
-    void modelInfo();
+    const std::vector<Mesh> &getTriangles() const { return triangles; }
+    const std::vector<Vertex> &getVertices() const { return vertices; }
+    void setVertices(const std::vector<Vertex> &vertices) { this->vertices = vertices; }
+    void setTriangles(const std::vector<Mesh> &triangles) { this->triangles = triangles; }
 
-   private:
+    void modelInfo() const;
+
+private:
     std::vector<Mesh> triangles;
     std::vector<Vertex> vertices;
 };

@@ -2,20 +2,22 @@
 #include <shader.hpp>
 
 class BBOX {
-   public:
+public:
     BBOX() = default;
-	~BBOX() = default;
 
-    BBOX(int minX, int minY, int maxX, int maxY)
-        : minX(minX), minY(minY), maxX(maxX), maxY(maxY) {}
+    ~BBOX() = default;
 
-    void updateBBox(const FragMesh& fragMesh);
+    BBOX(const int minX, const int minY, const int maxX, const int maxY)
+        : minX(minX), minY(minY), maxX(maxX), maxY(maxY) {
+    }
+
+    void updateBBox(const FragMesh &fragMesh);
 
     int getMinX() const { return minX; }
     int getMinY() const { return minY; }
     int getMaxX() const { return maxX; }
     int getMaxY() const { return maxY; }
 
-   private:
+private:
     int minX, minY, maxX, maxY;
 };

@@ -11,25 +11,23 @@
 
 curContext Window::context;
 
-Window::Window(size_t width, size_t height, const char* title)
+Window::Window(const size_t &width, const size_t &height, const char *title)
     : width(width), height(height), title(title) {
     init();
 }
 
-void Window::framebufferCallback(GLFWwindow* window, int width, int height)
-{
+void Window::framebufferCallback(GLFWwindow *window, int width, int height) {
     context.fb->reCreate(width, height, glm::vec3(0));
-	context.uniforms->screenHeight = height;
-	context.uniforms->screenWidth = width;
-    glm::mat4 P = glm::perspective(glm::radians(45.0f),
-        static_cast<float>(width) / static_cast<float>(height),
-        0.1f,
-        100.0f);
-	context.uniforms->projection = P;
+    context.uniforms->screenHeight = height;
+    context.uniforms->screenWidth = width;
+    const auto P = glm::perspective(glm::radians(45.0f),
+                                    static_cast<float>(width) / static_cast<float>(height),
+                                    0.1f,
+                                    100.0f);
+    context.uniforms->projection = P;
 }
 
 void Window::init() {
-
     if (!glfwInit()) {
         std::cerr << "Failed to initialize GLFW" << std::endl;
         exit(EXIT_FAILURE);
@@ -52,7 +50,7 @@ void Window::init() {
     glfwSetFramebufferSizeCallback(window.get(), framebufferCallback);
 }
 
-void Window::drawFrameBuffer(const FrameBuffer& fb) {
+void Window::drawFrameBuffer(const FrameBuffer &fb) const {
     HWND hwnd = glfwGetWin32Window(window.get());
     HDC hdcWindow = GetDC(hwnd);
     if (!hdcWindow) {
@@ -70,13 +68,13 @@ void Window::drawFrameBuffer(const FrameBuffer& fb) {
     BITMAPINFO bmi{};
     bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
     bmi.bmiHeader.biWidth = screenwidth;
-    bmi.bmiHeader.biHeight = -screenheight;  // 使用负值表示自上而下的 DIB
+    bmi.bmiHeader.biHeight = -screenheight; // 使用负值表示自上而下的 DIB
     bmi.bmiHeader.biPlanes = 1;
-    bmi.bmiHeader.biBitCount = 24;  // 每像素 24 位
+    bmi.bmiHeader.biBitCount = 24; // 每像素 24 位
     bmi.bmiHeader.biCompression = BI_RGB;
 
     // 创建 DIB Section
-    void* bits = nullptr;
+    void *bits = nullptr;
     HBITMAP hbm = CreateDIBSection(hdcWindow, &bmi, DIB_RGB_COLORS, &bits, nullptr, 0);
     if (!hbm || !bits) {
         ReleaseDC(hwnd, hdcWindow);
@@ -97,12 +95,12 @@ void Window::drawFrameBuffer(const FrameBuffer& fb) {
     // 填充像素数据到 DIB
     for (int y = 0; y < screenheight; ++y) {
         for (int x = 0; x < screenwidth; ++x) {
-            glm::vec3 color = fb.getColor(x, y);
-            int index = y * screenwidth + x;
+            const glm::vec3 color = fb.getColor(x, y);
+            const int index = y * screenwidth + x;
             // 使用 BGR 顺序存储
-            ((unsigned char*)bits)[index * 3 + 0] = static_cast<unsigned char>(color.b * 255);
-            ((unsigned char*)bits)[index * 3 + 1] = static_cast<unsigned char>(color.g * 255);
-            ((unsigned char*)bits)[index * 3 + 2] = static_cast<unsigned char>(color.r * 255);
+            static_cast<unsigned char *>(bits)[index * 3 + 0] = static_cast<unsigned char>(color.b * 255);
+            static_cast<unsigned char *>(bits)[index * 3 + 1] = static_cast<unsigned char>(color.g * 255);
+            static_cast<unsigned char *>(bits)[index * 3 + 2] = static_cast<unsigned char>(color.r * 255);
         }
     }
 

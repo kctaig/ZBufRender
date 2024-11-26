@@ -4,12 +4,14 @@
 #include <window.hpp>
 
 class Application {
-   public:
+public:
     Application() { init(); }
-    ~Application() = default;
-    void run();
 
-   private:
+    ~Application() = default;
+
+    void run() const;
+
+private:
     std::unique_ptr<Window> window;
     std::unique_ptr<Render> render;
     std::unique_ptr<Shader> shader;

@@ -5,34 +5,38 @@
 #include <shader.hpp>
 
 struct curContext {
-    FrameBuffer* fb;
-    Uniforms* uniforms;
+    FrameBuffer *fb;
+    Uniforms *uniforms;
 };
 
 class Window {
-   public:
+public:
     Window() = default;
+
     ~Window() = default;
 
-    Window(const Window&) = delete;
-    Window& operator=(const Window&) = delete;
+    Window(const Window &) = delete;
 
-    Window(size_t width, size_t height, const char* title);
+    Window &operator=(const Window &) = delete;
 
-    void drawFrameBuffer(const FrameBuffer& fb);
+    Window(const size_t &width, const size_t &height, const char *title);
+
+    void drawFrameBuffer(const FrameBuffer &fb) const;
 
     size_t getWidth() const { return width; }
     size_t getHeight() const { return height; }
-    GLFWwindow* getWindowPtr() { return window.get(); }
+    GLFWwindow *getWindowPtr() const { return window.get(); }
 
-    static void framebufferCallback(GLFWwindow* window, int width, int height);
-    curContext& getContext() { return context; }
+    static void framebufferCallback(GLFWwindow *window, int width, int height);
 
-   private:
-    size_t width, height;
-    const char* title;
+    static curContext &getContext() { return context; }
+
+private:
+    size_t width{}, height{};
+    const char *title{};
     std::unique_ptr<GLFWwindow, decltype(&glfwDestroyWindow)> window{
-        nullptr, glfwDestroyWindow};
+        nullptr, glfwDestroyWindow
+    };
 
     static curContext context;
 
