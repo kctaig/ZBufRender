@@ -4,6 +4,8 @@
 class BBOX {
    public:
     BBOX() = default;
+	~BBOX() = default;
+
     BBOX(int minX, int minY, int maxX, int maxY)
         : minX(minX), minY(minY), maxX(maxX), maxY(maxY) {}
 

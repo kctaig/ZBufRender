@@ -1,8 +1,8 @@
 #pragma once
 
 #include <glm/glm.hpp>
-#include <vector>
 #include <string>
+#include <vector>
 
 struct Vertex {
     glm::vec3 pos;

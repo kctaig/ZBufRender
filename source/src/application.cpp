@@ -8,16 +8,18 @@ void Application::run() {
     while (!glfwWindowShouldClose(window->getWindowPtr())) {
 
         auto start = std::chrono::high_resolution_clock::now();
-
-        render->processTriangles(*framebuffer, *uniforms, *shader, model, true);
+        
+        render->processTriangles(*framebuffer, *uniforms, *shader, model, false);
 
         // 设置像素操作参数
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
         glDrawPixels(framebuffer->getWidth(), framebuffer->getHeight(), GL_RGB, GL_UNSIGNED_BYTE, framebuffer->getScreenBuffer()->data());
+
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         glfwSwapInterval(1);
         glfwSwapBuffers(window->getWindowPtr());
-
+        
         glfwPollEvents();
 
         auto end = std::chrono::high_resolution_clock::now();
@@ -28,8 +30,9 @@ void Application::run() {
 }
 
 void Application::init() {
-    size_t width = 800, height = 600;
-    model = std::make_unique<Model>(R"(D:\code\ZBufRender\asserts)", "bunny.obj");
+    size_t width = 600, height = 400;
+    model = std::make_unique<Model>(R"(D:\code\ZBufRender\asserts)", "armadillo.obj");
+    //model->modelInfo();
     window = std::make_unique<Window>(width, height, "ZBufRender");
     shader = std::make_unique<Shader>(vertexShader, fragmentShader);
     render = std::make_unique<Render>();

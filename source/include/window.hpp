@@ -26,13 +26,13 @@ class Window {
     GLFWwindow* getWindowPtr() { return window.get(); }
 
     static void framebufferCallback(GLFWwindow* window, int width, int height);
-	curContext& getContext() { return context; }
+    curContext& getContext() { return context; }
 
    private:
     size_t width, height;
     const char* title;
     std::unique_ptr<GLFWwindow, decltype(&glfwDestroyWindow)> window{
-        nullptr, glfwDestroyWindow };
+        nullptr, glfwDestroyWindow};
 
     static curContext context;
 

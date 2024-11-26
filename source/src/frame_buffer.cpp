@@ -4,10 +4,10 @@ FrameBuffer::FrameBuffer(size_t width, size_t height)
     : width(width),
       height(height),
       pixelCount(width * height) {
-    depthBuffer = std::make_unique<std::vector<float>>(pixelCount);
+    depthBuffer = std::make_unique<std::vector<float>>(pixelCount,1.f);
     colorBuffer = std::make_unique<std::vector<glm::vec3>>(pixelCount);
 	screenBuffer = std::make_unique<std::vector<glm::u8vec3>>(pixelCount);
-    clear(glm::vec3(0));
+    clear(glm::vec3(1,0,0));
 }
 
 void FrameBuffer::clear(const glm::vec3 &color) {
@@ -24,7 +24,7 @@ void FrameBuffer::reCreate(size_t w, size_t h,const glm::vec3 & color)
 	width = w;
 	height = h;
 	pixelCount = w * h;
-	depthBuffer->resize(pixelCount);
+	depthBuffer->resize(pixelCount,1.f);
 	colorBuffer->resize(pixelCount);
 	screenBuffer->resize(pixelCount);
 	clear(color);
