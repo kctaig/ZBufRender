@@ -7,7 +7,8 @@ source_group(
         FILES ${SOURCE_FILES} ${HEADER_FILES} ${SHADER_FILES} main.cpp
 )
 
-add_executable(${TARGET_NAME} main.cpp ${SOURCE_FILES} ${HEADER_FILES} ${SHADER_FILES})
+add_executable(${TARGET_NAME} main.cpp ${SOURCE_FILES} ${HEADER_FILES} ${SHADER_FILES}
+        include/Camera.hpp)
 
 set(THIRD_PARTY_DIR "${CMAKE_SOURCE_DIR}/3rdparty")
 set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
@@ -24,14 +25,17 @@ target_link_libraries(${TARGET_NAME}
         PUBLIC
         glfw
         glm
+        glad
         ${OPENGL_LIBRARIES}
         OpenMP::OpenMP_CXX
 )
 
+#target_include_directories(${TARGET_NAME} PUBLIC ${THIRD_PARTY_DIR}/glad/include)
 target_include_directories(${TARGET_NAME} PUBLIC ${THIRD_PARTY_DIR})
 target_include_directories(${TARGET_NAME} PUBLIC ${INCLUDE_DIR})
 target_include_directories(${TARGET_NAME} PUBLIC ${SHADER_INCLUDE})
 target_include_directories(${TARGET_NAME} PUBLIC ${GLFW_INCLUDE})
 target_include_directories(${TARGET_NAME} PUBLIC ${GLM_INCLUDE})
 target_include_directories(${TARGET_NAME} PUBLIC ${LOADER_INCLUDE})
+
 

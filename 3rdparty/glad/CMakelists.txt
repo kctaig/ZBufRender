@@ -1,0 +1,11 @@
+# 定义 glad 库
+project(glad LANGUAGES C)
+
+# 指定源文件
+set(SOURCE_FILES src/glad.c)
+
+# 创建静态库目标
+add_library(glad STATIC ${SOURCE_FILES})
+
+# 指定头文件目录
+target_include_directories(glad PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

@@ -1,5 +1,5 @@
+#include <glad/glad.h>
 #include "Window.hpp"
-#include <wtypes.h>
 #include <algorithm>
 #include <iostream>
 #include <render.hpp>
@@ -7,25 +7,78 @@
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 #include <glm/gtc/matrix_transform.hpp>
-#include <gl/GL.h>
+
 
 curContext Window::context;
 
 Window::Window(const size_t &width, const size_t &height, const char *title)
     : width(width), height(height), title(title) {
     init();
+    lastX = width / 2;
+    lastY = height / 2;
+    context.lastX = &lastX;
+    context.lastY = &lastY;
+    context.firstMouse = &firstMouse;
+    context.deltaTime = &deltaTime;
+    context.lastFrame = &lastFrame;
 }
 
 void Window::framebufferCallback(GLFWwindow *window, int width, int height) {
     context.fb->reCreate(width, height, glm::vec3(0));
     context.uniforms->screenHeight = height;
     context.uniforms->screenWidth = width;
-    const auto P = glm::perspective(glm::radians(45.0f),
-                                    static_cast<float>(width) / static_cast<float>(height),
-                                    0.1f,
-                                    100.0f);
-    context.uniforms->projection = P;
+    // const auto P = glm::perspective(glm::radians(45.0f),
+    //                                 static_cast<float>(width) / static_cast<float>(height),
+    //                                 0.1f,
+    //                                 100.0f);
+    // context.uniforms->projection = P;
 }
+
+void Window::processInput(GLFWwindow* window)
+{
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+        //glfwSetWindowShouldClose(window, true);
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL); // ÊÍ·ÅÊó±ê
+    }
+    if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        context.camera->ProcessKeyboard(FORWARD, *(context.deltaTime));
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        context.camera->ProcessKeyboard(BACKWARD, *(context.deltaTime));
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        context.camera->ProcessKeyboard(LEFT, *(context.deltaTime));
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+        context.camera->ProcessKeyboard(RIGHT, *(context.deltaTime));
+}
+
+void Window::mouseCallback(GLFWwindow* window, double xposIn, double yposIn)
+{
+    float xpos = static_cast<float>(xposIn);
+    float ypos = static_cast<float>(yposIn);
+
+    if (*(context.firstMouse))
+    {
+        *(context.lastX) = xpos;
+        *(context.lastY) = ypos;
+        *(context.firstMouse) = false;
+    }
+
+    float xoffset = xpos - *(context.lastX);
+    float yoffset = *(context.lastY) - ypos; // reversed since y-coordinates go from bottom to top
+
+    *(context.lastX) = xpos;
+    *(context.lastY) = ypos;
+
+    context.camera->ProcessMouseMovement(xoffset, yoffset);
+}
+
+void Window::scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    context.camera->ProcessMouseScroll(static_cast<float>(yoffset));
+}
+
 
 void Window::init() {
     if (!glfwInit()) {
@@ -41,13 +94,18 @@ void Window::init() {
     }
 
     glfwMakeContextCurrent(window.get());
-
-    //if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-    //    std::cerr << "Failed to initialize GLAD" << std::endl;
-    //    exit(EXIT_FAILURE);
-    //}
-
     glfwSetFramebufferSizeCallback(window.get(), framebufferCallback);
+    glfwSetCursorPosCallback(window.get(), mouseCallback);
+    glfwSetScrollCallback(window.get(), scrollCallback);
+
+    // tell GLFW to capture our mouse
+    glfwSetInputMode(window.get(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    // glad: load all OpenGL function pointers
+    if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
+        std::cerr << "Failed to initialize GLAD" << std::endl;
+        exit(EXIT_FAILURE);
+    }
 }
 
 void Window::drawFrameBuffer(const FrameBuffer &fb) const {

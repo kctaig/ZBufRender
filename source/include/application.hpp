@@ -18,6 +18,7 @@ private:
     std::unique_ptr<Model> model;
     std::shared_ptr<FrameBuffer> framebuffer;
     std::shared_ptr<Uniforms> uniforms;
+    std::unique_ptr<Camera> camera;
 
     void init();
 };
