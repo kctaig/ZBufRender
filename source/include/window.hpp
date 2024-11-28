@@ -3,16 +3,15 @@
 #include <GLFW/glfw3.h>
 #include <frame_buffer.hpp>
 #include <shader.hpp>
-
-#include "Camera.hpp"
+#include <camera.hpp>
 
 struct curContext {
-    FrameBuffer *fb;
-    Uniforms *uniforms;
-    Camera *camera;
-    float *lastX, *lastY;
-    bool *firstMouse;
-    float *deltaTime, *lastFrame;
+    FrameBuffer *fbPtr;
+    Uniforms *uniformsPtr;
+    Camera *cameraPtr;
+    float *lastXPtr, *lastYPtr;
+    bool *firstMousePtr;
+    float *deltaTimePtr, *lastFramePtr;
 };
 
 class Window {
@@ -35,8 +34,8 @@ public:
 
     static void processInput(GLFWwindow *window);
     static void framebufferCallback(GLFWwindow *window, int width, int height);
-    static void mouseCallback(GLFWwindow* window, double xpos, double ypos);
-    static void scrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+    static void mouseCallback(GLFWwindow* window, double xPosIn, double yPosIn);
+    static void scrollCallback(GLFWwindow* window, double xOffset, double yOffset);
 
     static curContext &getContext() { return context; }
 

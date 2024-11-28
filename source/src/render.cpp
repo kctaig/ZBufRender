@@ -6,9 +6,7 @@
 #include<iostream>
 
 void Render::draw(const Uniforms &uniforms,
-                  const Shader &shader) {
-    auto start = std::chrono::high_resolution_clock::now();
-
+                  const Shader &shader) const {
     const auto &vertices = modelPtr->getVertices();
     const auto &triangles = modelPtr->getTriangles();
     const int numTriangles = static_cast<int>(triangles.size());
@@ -51,14 +49,11 @@ void Render::draw(const Uniforms &uniforms,
     }
 #endif
 
-    auto end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-    std::cout << "Execution time: " << duration << " ms" << std::endl;
 }
 
 void Render::processTriangles(const Uniforms &uniforms,
                               const Shader &shader,
-                              bool useParallel) {
+                              bool useParallel) const {
     const auto &vertices = modelPtr->getVertices();
     const auto &triangles = modelPtr->getTriangles();
 
@@ -93,7 +88,7 @@ void Render::processTriangles(const Uniforms &uniforms,
 
 void Render::rasterization(const Shader &shader,
                            const Uniforms &uniforms,
-                           const FragMesh &fragMesh) {
+                           const FragMesh &fragMesh) const {
     // bounding box
     BBOX bbox({0, 0, uniforms.screenWidth, uniforms.screenHeight});
     bbox.updateBBox(fragMesh);

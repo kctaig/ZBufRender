@@ -1,5 +1,5 @@
 #include <glad/glad.h>
-#include "Window.hpp"
+#include <Window.hpp>
 #include <algorithm>
 #include <iostream>
 #include <render.hpp>
@@ -8,7 +8,6 @@
 #include <GLFW/glfw3native.h>
 #include <glm/gtc/matrix_transform.hpp>
 
-
 curContext Window::context;
 
 Window::Window(const size_t &width, const size_t &height, const char *title)
@@ -16,17 +15,17 @@ Window::Window(const size_t &width, const size_t &height, const char *title)
     init();
     lastX = static_cast<float>(width) / 2;
     lastY = static_cast<float>(height) / 2;
-    context.lastX = &lastX;
-    context.lastY = &lastY;
-    context.firstMouse = &firstMouse;
-    context.deltaTime = &deltaTime;
-    context.lastFrame = &lastFrame;
+    context.lastXPtr = &lastX;
+    context.lastYPtr = &lastY;
+    context.firstMousePtr = &firstMouse;
+    context.deltaTimePtr = &deltaTime;
+    context.lastFramePtr = &lastFrame;
 }
 
 void Window::framebufferCallback(GLFWwindow *window, int width, int height) {
-    context.fb->reCreate(width, height, glm::vec3(0));
-    context.uniforms->screenHeight = height;
-    context.uniforms->screenWidth = width;
+    context.fbPtr->reCreate(width, height, glm::vec3(0));
+    context.uniformsPtr->screenHeight = height;
+    context.uniformsPtr->screenWidth = width;
 }
 
 void Window::processInput(GLFWwindow* window)
@@ -39,41 +38,40 @@ void Window::processInput(GLFWwindow* window)
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        context.camera->ProcessKeyboard(FORWARD, *(context.deltaTime));
+        context.cameraPtr->ProcessKeyboard(FORWARD, *(context.deltaTimePtr));
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        context.camera->ProcessKeyboard(BACKWARD, *(context.deltaTime));
+        context.cameraPtr->ProcessKeyboard(BACKWARD, *(context.deltaTimePtr));
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        context.camera->ProcessKeyboard(LEFT, *(context.deltaTime));
+        context.cameraPtr->ProcessKeyboard(LEFT, *(context.deltaTimePtr));
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        context.camera->ProcessKeyboard(RIGHT, *(context.deltaTime));
+        context.cameraPtr->ProcessKeyboard(RIGHT, *(context.deltaTimePtr));
 }
 
-void Window::mouseCallback(GLFWwindow* window, double xposIn, double yposIn)
+void Window::mouseCallback(GLFWwindow* window, double xPosIn, double yPosIn)
 {
-    float xpos = static_cast<float>(xposIn);
-    float ypos = static_cast<float>(yposIn);
+    const auto xPos = static_cast<float>(xPosIn);
+    const auto yPos = static_cast<float>(yPosIn);
 
-    if (*(context.firstMouse))
+    if (*(context.firstMousePtr))
     {
-        *(context.lastX) = xpos;
-        *(context.lastY) = ypos;
-        *(context.firstMouse) = false;
+        *(context.lastXPtr) = xPos;
+        *(context.lastYPtr) = yPos;
+        *(context.firstMousePtr) = false;
     }
 
-    float xoffset = xpos - *(context.lastX);
-    float yoffset = *(context.lastY) - ypos; // reversed since y-coordinates go from bottom to top
+    const float xOffset =  *(context.lastXPtr) - xPos;
+    const float yOffset = yPos - *(context.lastYPtr); // reversed since y-coordinates go from bottom to top
 
-    *(context.lastX) = xpos;
-    *(context.lastY) = ypos;
+    *(context.lastXPtr) = xPos;
+    *(context.lastYPtr) = yPos;
 
-    context.camera->ProcessMouseMovement(xoffset, yoffset);
+    context.cameraPtr->ProcessMouseMovement(xOffset, yOffset);
 }
 
-void Window::scrollCallback(GLFWwindow* window, double xoffset, double yoffset)
+void Window::scrollCallback(GLFWwindow* window, double xOffset, double yOffset)
 {
-    context.camera->ProcessMouseScroll(static_cast<float>(yoffset));
+    context.cameraPtr->ProcessMouseScroll(static_cast<float>(yOffset));
 }
-
 
 void Window::init() {
     if (!glfwInit()) {

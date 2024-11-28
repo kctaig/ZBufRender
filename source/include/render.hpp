@@ -17,15 +17,15 @@ public:
 
     void processTriangles(const Uniforms &uniforms,
                           const Shader &shader,
-                          bool useParallel = true);
+                          bool useParallel = true) const;
 
     // ÒÑ·ÏÆú
     void draw(const Uniforms &uniforms,
-              const Shader &shader);
+              const Shader &shader) const;
 
     void rasterization(const Shader &shader,
                        const Uniforms &uniforms,
-                       const FragMesh &fragMesh);
+                       const FragMesh &fragMesh) const;
 
     static glm::vec3 calculateWeights(
         const FragMesh &fragMesh,

@@ -1,11 +1,12 @@
 #include <application.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <chrono>
+#include <iostream>
 
 void Application::run() const {
     // render loop
     while (!glfwWindowShouldClose(windowPtr->getWindowPtr())) {
-        // auto start = std::chrono::high_resolution_clock::now();
+        auto start = std::chrono::high_resolution_clock::now();
 
         // ÉèÖÃÊ±¼ä
         renderPtr->getFrameBufferPtr()->clear();
@@ -36,9 +37,9 @@ void Application::run() const {
 
         glfwPollEvents();
 
-        // auto end = std::chrono::high_resolution_clock::now();
-        // const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-        // std::cout << "Execution time: " << duration << " ms" << std::endl;
+        auto end = std::chrono::high_resolution_clock::now();
+        const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+        std::cout << "Execution time: " << duration << " ms" << std::endl;
     }
     glfwTerminate();
 }
@@ -54,7 +55,7 @@ void Application::init() {
     shaderPtr = std::make_unique<Shader>(vertexShader, fragmentShader);
     uniformsPtr = std::make_unique<Uniforms>();
 
-    Window::getContext().fb = framebufferPtr.get();
-    Window::getContext().uniforms = uniformsPtr.get();
-    Window::getContext().camera = cameraPtr.get();
+    Window::getContext().fbPtr = framebufferPtr.get();
+    Window::getContext().uniformsPtr = uniformsPtr.get();
+    Window::getContext().cameraPtr = cameraPtr.get();
 }
