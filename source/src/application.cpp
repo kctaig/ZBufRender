@@ -17,8 +17,7 @@ void Application::run() const {
         // ¸üÐÂMVP¾ØÕó
         uniformsPtr->updateMVP(*renderPtr->getCameraPtr(), *renderPtr->getFrameBufferPtr());
 
-        renderPtr->processTriangles(*renderPtr->getFrameBufferPtr(),
-                                    *uniformsPtr,
+        renderPtr->processTriangles(*uniformsPtr,
                                     *shaderPtr,
                                     false);
 

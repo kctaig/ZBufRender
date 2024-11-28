@@ -16,7 +16,6 @@ private:
     std::unique_ptr<Shader> shaderPtr;
     std::shared_ptr<Uniforms> uniformsPtr;
     std::unique_ptr<Render> renderPtr;
-    // std::shared_ptr<FrameBuffer> framebuffer;
 
     void init();
 };

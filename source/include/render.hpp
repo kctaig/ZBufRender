@@ -15,21 +15,17 @@ public:
         framebufferPtr = fbPtr;
     }
 
-    void processTriangles(FrameBuffer &fb,
-                          const Uniforms &uniforms,
+    void processTriangles(const Uniforms &uniforms,
                           const Shader &shader,
-                          bool useParallel = true) const;
+                          bool useParallel = true);
 
     // ÒÑ·ÏÆú
-    static void draw(FrameBuffer &fb,
-                     const Uniforms &uniforms,
-                     const Shader &shader,
-                     const std::unique_ptr<Model> &model);
+    void draw(const Uniforms &uniforms,
+              const Shader &shader);
 
-    static void rasterization(FrameBuffer &fb,
-                              const Shader &shader,
-                              const Uniforms &uniforms,
-                              const FragMesh &fragMesh);
+    void rasterization(const Shader &shader,
+                       const Uniforms &uniforms,
+                       const FragMesh &fragMesh);
 
     static glm::vec3 calculateWeights(
         const FragMesh &fragMesh,

@@ -5,14 +5,12 @@
 #include <omp.h>
 #include<iostream>
 
-void Render::draw(FrameBuffer &fb,
-                  const Uniforms &uniforms,
-                  const Shader &shader,
-                  const std::unique_ptr<Model> &model) {
+void Render::draw(const Uniforms &uniforms,
+                  const Shader &shader) {
     auto start = std::chrono::high_resolution_clock::now();
 
-    const auto &vertices = model->getVertices();
-    const auto &triangles = model->getTriangles();
+    const auto &vertices = modelPtr->getVertices();
+    const auto &triangles = modelPtr->getTriangles();
     const int numTriangles = static_cast<int>(triangles.size());
 
 #define USE_OMP_FRO_PARALLEL true
@@ -33,7 +31,7 @@ void Render::draw(FrameBuffer &fb,
                 fragMeshes[threadId].screenMesh[vertexIndex] = shader.getVertexShader()(vertex, uniforms);
                 vertexIndex++;
             }
-            rasterization(fb, shader, uniforms, fragMeshes[threadId]);
+            rasterization(shader, uniforms, fragMeshes[threadId]);
         }
     }
 #endif
@@ -48,7 +46,7 @@ void Render::draw(FrameBuffer &fb,
             fragMesh->screenMesh[vertexIndex] = shader.getVertexShader()(vertex, uniforms);
             vertexIndex++;
         }
-        rasterization(fb, shader, uniforms, *fragMesh);
+        rasterization(shader, uniforms, *fragMesh);
         delete fragMesh;
     }
 #endif
@@ -58,10 +56,9 @@ void Render::draw(FrameBuffer &fb,
     std::cout << "Execution time: " << duration << " ms" << std::endl;
 }
 
-void Render::processTriangles(FrameBuffer &fb,
-                              const Uniforms &uniforms,
+void Render::processTriangles(const Uniforms &uniforms,
                               const Shader &shader,
-                              bool useParallel) const {
+                              bool useParallel) {
     const auto &vertices = modelPtr->getVertices();
     const auto &triangles = modelPtr->getTriangles();
 
@@ -89,13 +86,12 @@ void Render::processTriangles(FrameBuffer &fb,
             }
 
             // 光栅化处理
-            rasterization(fb, shader, uniforms, localFragMesh);
+            rasterization(shader, uniforms, localFragMesh);
         }
     }
 }
 
-void Render::rasterization(FrameBuffer &fb,
-                           const Shader &shader,
+void Render::rasterization(const Shader &shader,
                            const Uniforms &uniforms,
                            const FragMesh &fragMesh) {
     // bounding box
@@ -116,18 +112,18 @@ void Render::rasterization(FrameBuffer &fb,
             }
 
             // depth test
-            const float fbDepth = fb.getDepth(x, y);
+            const float fbDepth = framebufferPtr->getDepth(x, y);
             const float curDepth = fragMesh.screenMesh[0].z * weights[0] + fragMesh.screenMesh[1].z * weights[1] +
                                    fragMesh.
                                    screenMesh[2].z * weights[2];
             if (curDepth > fbDepth) {
                 continue;
             }
-            fb.setDepth(x, y, curDepth);
+            framebufferPtr->setDepth(x, y, curDepth);
 
             // fragment shader
             glm::vec3 color = shader.getFragmentShader()(glm::vec4(x, y, 0.f, 1.f), uniforms);
-            fb.setPixel(x, y, color);
+            framebufferPtr->setPixel(x, y, color);
         }
     }
 }
