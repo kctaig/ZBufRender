@@ -3,6 +3,7 @@
 #include <chrono>
 #include <model.hpp>
 #include <omp.h>
+#include<iostream>
 
 void Render::draw(FrameBuffer &fb,
                   const Uniforms &uniforms,
@@ -60,10 +61,9 @@ void Render::draw(FrameBuffer &fb,
 void Render::processTriangles(FrameBuffer &fb,
                               const Uniforms &uniforms,
                               const Shader &shader,
-                              const std::unique_ptr<Model> &model,
-                              const bool useParallel) {
-    const auto &vertices = model->getVertices();
-    const auto &triangles = model->getTriangles();
+                              bool useParallel) const {
+    const auto &vertices = modelPtr->getVertices();
+    const auto &triangles = modelPtr->getTriangles();
 
     // 确定线程数
     const int maxThreads = useParallel ? omp_get_max_threads() : 1;

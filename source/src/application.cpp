@@ -4,35 +4,36 @@
 
 void Application::run() const {
     // render loop
-    while (!glfwWindowShouldClose(window->getWindowPtr())) {
+    while (!glfwWindowShouldClose(windowPtr->getWindowPtr())) {
         // auto start = std::chrono::high_resolution_clock::now();
+
         // 设置时间
-        framebuffer->clear();
-        float curFrame = static_cast<float>(glfwGetTime());
-        window->deltaTime = curFrame - window->lastFrame;
-        window->lastFrame = curFrame;
+        renderPtr->getFrameBufferPtr()->clear();
+        const auto curFrame = static_cast<float>(glfwGetTime());
+        windowPtr->deltaTime = curFrame - windowPtr->lastFrame;
+        windowPtr->lastFrame = curFrame;
 
-        Window::processInput(window->getWindowPtr());
+        Window::processInput(windowPtr->getWindowPtr());
         // 更新MVP矩阵
-        uniforms->updateMVP(*camera,*framebuffer);
+        uniformsPtr->updateMVP(*renderPtr->getCameraPtr(), *renderPtr->getFrameBufferPtr());
 
-        Render::processTriangles(*framebuffer,
-                                 *uniforms,
-                                 *shader,
-                                 model, false);
+        renderPtr->processTriangles(*renderPtr->getFrameBufferPtr(),
+                                    *uniformsPtr,
+                                    *shaderPtr,
+                                    false);
 
         // 设置像素操作参数
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-        glDrawPixels(static_cast<GLsizei>(framebuffer->getWidth()),
-                     static_cast<GLsizei>(framebuffer->getHeight()),
+        glDrawPixels(static_cast<GLsizei>(renderPtr->getFrameBufferPtr()->getWidth()),
+                     static_cast<GLsizei>(renderPtr->getFrameBufferPtr()->getHeight()),
                      GL_RGB,
                      GL_UNSIGNED_BYTE,
-                     framebuffer->getScreenBuffer()->data());
+                     renderPtr->getFrameBufferPtr()->getScreenBuffer()->data());
 
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         glfwSwapInterval(1);
-        glfwSwapBuffers(window->getWindowPtr());
+        glfwSwapBuffers(windowPtr->getWindowPtr());
 
         glfwPollEvents();
 
@@ -45,14 +46,16 @@ void Application::run() const {
 
 void Application::init() {
     size_t width = 600, height = 400;
-    model = std::make_unique<Model>(R"(D:\code\ZBufRender\asserts)", "bunny.obj");// armadillo
-    window = std::make_unique<Window>(width, height, "ZBufRender");
-    shader = std::make_unique<Shader>(vertexShader, fragmentShader);
-    framebuffer = std::make_shared<FrameBuffer>(width, height);
-    camera = std::make_unique<Camera>(glm::vec3(0,0,6));
-    uniforms = std::make_unique<Uniforms>();
+    auto modelPtr = std::make_unique<Model>(R"(D:\code\ZBufRender\asserts)", "bunny.obj"); // armadillo
+    auto cameraPtr = std::make_shared<Camera>(glm::vec3(0.0f, 0.0f, 6.0f));
+    auto framebufferPtr = std::make_shared<FrameBuffer>(width, height);
 
-    Window::getContext().fb = framebuffer.get();
-    Window::getContext().uniforms = uniforms.get();
-    Window::getContext().camera = camera.get();
+    renderPtr = std::make_unique<Render>(std::move(modelPtr),cameraPtr,framebufferPtr);
+    windowPtr = std::make_unique<Window>(width, height, "ZBufRender");
+    shaderPtr = std::make_unique<Shader>(vertexShader, fragmentShader);
+    uniformsPtr = std::make_unique<Uniforms>();
+
+    Window::getContext().fb = framebufferPtr.get();
+    Window::getContext().uniforms = uniformsPtr.get();
+    Window::getContext().camera = cameraPtr.get();
 }

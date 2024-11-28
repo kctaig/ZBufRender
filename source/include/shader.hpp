@@ -31,7 +31,7 @@ struct Uniforms {
     int screenWidth;
     int screenHeight;
 
-    void updateMVP(Camera &cam, FrameBuffer &fb) {
+    void updateMVP(const Camera &cam, const FrameBuffer &fb) {
         screenWidth = static_cast<int>(fb.getWidth());
         screenHeight = static_cast<int>(fb.getHeight());
         view = cam.GetViewMatrix();

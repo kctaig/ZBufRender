@@ -1,6 +1,5 @@
 #pragma once
 
-#include <iostream>
 #include <glm/glm.hpp>
 #include <memory>
 
@@ -10,21 +9,21 @@ public:
 
     ~FrameBuffer() = default;
 
-    FrameBuffer(const size_t &width, const size_t &height);
+    FrameBuffer(size_t width, size_t height);
 
-    void clear(const glm::vec3 &color = {0, 0, 0});
+    void clear(glm::vec3 color = {0, 0, 0});
 
     size_t getWidth() const { return width; }
     size_t getHeight() const { return height; }
 
-    size_t getIndex(const size_t &x, const size_t &y) const;
+    size_t getIndex(size_t x, size_t y) const;
 
-    float getDepth(const size_t x, const size_t y) const { return (*depthBuffer)[getIndex(x, y)]; }
-    const glm::vec3 &getColor(const size_t x, const size_t y) const { return (*colorBuffer)[getIndex(x, y)]; }
-    void setDepth(const size_t x, const size_t y, const float depth) { (*depthBuffer)[getIndex(x, y)] = depth; }
-    void setPixel(const size_t x, const size_t y, const glm::vec3 &color) { (*colorBuffer)[getIndex(x, y)] = color; }
+    float getDepth(size_t x, size_t y) const { return (*depthBuffer)[getIndex(x, y)]; }
+    const glm::vec3 &getColor(size_t x, size_t y) const { return (*colorBuffer)[getIndex(x, y)]; }
+    void setDepth(size_t x, size_t y, float depth) { (*depthBuffer)[getIndex(x, y)] = depth; }
+    void setPixel(size_t x, size_t y, glm::vec3 color) { (*colorBuffer)[getIndex(x, y)] = color; }
 
-    void reCreate(size_t w, size_t h, const glm::vec3 &color = {0, 0, 0});
+    void reCreate(size_t w, size_t h, glm::vec3 color = {0, 0, 0});
 
     const std::unique_ptr<std::vector<glm::u8vec3> > &getScreenBuffer();
 

@@ -14,8 +14,8 @@ curContext Window::context;
 Window::Window(const size_t &width, const size_t &height, const char *title)
     : width(width), height(height), title(title) {
     init();
-    lastX = width / 2;
-    lastY = height / 2;
+    lastX = static_cast<float>(width) / 2;
+    lastY = static_cast<float>(height) / 2;
     context.lastX = &lastX;
     context.lastY = &lastY;
     context.firstMouse = &firstMouse;
@@ -27,11 +27,6 @@ void Window::framebufferCallback(GLFWwindow *window, int width, int height) {
     context.fb->reCreate(width, height, glm::vec3(0));
     context.uniforms->screenHeight = height;
     context.uniforms->screenWidth = width;
-    // const auto P = glm::perspective(glm::radians(45.0f),
-    //                                 static_cast<float>(width) / static_cast<float>(height),
-    //                                 0.1f,
-    //                                 100.0f);
-    // context.uniforms->projection = P;
 }
 
 void Window::processInput(GLFWwindow* window)

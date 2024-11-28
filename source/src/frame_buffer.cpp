@@ -1,6 +1,6 @@
 #include <frame_buffer.hpp>
 
-FrameBuffer::FrameBuffer(const size_t &width, const size_t &height)
+FrameBuffer::FrameBuffer(size_t width, size_t height)
     : width(width),
       height(height),
       pixelCount(width * height) {
@@ -10,16 +10,16 @@ FrameBuffer::FrameBuffer(const size_t &width, const size_t &height)
     clear(glm::vec3(1, 0, 0));
 }
 
-void FrameBuffer::clear(const glm::vec3 &color) {
+void FrameBuffer::clear(glm::vec3 color) {
     depthBuffer->assign(pixelCount, 1.f);
     colorBuffer->assign(pixelCount, color);
 }
 
-size_t FrameBuffer::getIndex(const size_t &x, const size_t &y) const {
+size_t FrameBuffer::getIndex(size_t x, size_t y) const {
     return y * width + x;
 }
 
-void FrameBuffer::reCreate(size_t w, size_t h, const glm::vec3 &color) {
+void FrameBuffer::reCreate(size_t w, size_t h, glm::vec3 color) {
     width = w;
     height = h;
     pixelCount = w * h;

@@ -19,11 +19,7 @@ public:
 
     ~Model() = default;
 
-    Model(const std::vector<Mesh> &triangles, const std::vector<Vertex> &vertices)
-        : triangles(triangles), vertices(vertices) {
-    }
-
-    Model(const std::string &dirPath, const std::string &fileName);
+    Model( std::string dirPath,  std::string fileName);
 
     const std::vector<Mesh> &getTriangles() const { return triangles; }
     const std::vector<Vertex> &getVertices() const { return vertices; }

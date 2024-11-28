@@ -7,7 +7,7 @@ public:
 
     ~BBOX() = default;
 
-    BBOX(const int minX, const int minY, const int maxX, const int maxY)
+    BBOX(int minX, int minY, int maxX, int maxY)
         : minX(minX), minY(minY), maxX(maxX), maxY(maxY) {
     }
 

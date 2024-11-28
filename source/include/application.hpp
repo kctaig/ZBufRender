@@ -12,13 +12,11 @@ public:
     void run() const;
 
 private:
-    std::unique_ptr<Window> window;
-    std::unique_ptr<Render> render;
-    std::unique_ptr<Shader> shader;
-    std::unique_ptr<Model> model;
-    std::shared_ptr<FrameBuffer> framebuffer;
-    std::shared_ptr<Uniforms> uniforms;
-    std::unique_ptr<Camera> camera;
+    std::unique_ptr<Window> windowPtr;
+    std::unique_ptr<Shader> shaderPtr;
+    std::shared_ptr<Uniforms> uniformsPtr;
+    std::unique_ptr<Render> renderPtr;
+    // std::shared_ptr<FrameBuffer> framebuffer;
 
     void init();
 };

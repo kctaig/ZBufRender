@@ -9,11 +9,16 @@ public:
 
     ~Render() = default;
 
-    static void processTriangles(FrameBuffer &fb,
-                                 const Uniforms &uniforms,
-                                 const Shader &shader,
-                                 const std::unique_ptr<Model> &model,
-                                 bool useParallel = true);
+    Render(std::unique_ptr<Model> mPtr, std::shared_ptr<Camera> cPtr, std::shared_ptr<FrameBuffer> fbPtr) {
+        modelPtr = std::move(mPtr);
+        cameraPtr = cPtr;
+        framebufferPtr = fbPtr;
+    }
+
+    void processTriangles(FrameBuffer &fb,
+                          const Uniforms &uniforms,
+                          const Shader &shader,
+                          bool useParallel = true) const;
 
     // ÒÑ·ÏÆú
     static void draw(FrameBuffer &fb,
@@ -31,4 +36,13 @@ public:
         const glm::vec2 &screenPoint);
 
     static constexpr float EPSILON = std::numeric_limits<float>::epsilon();
+
+    auto getCameraPtr() const { return cameraPtr; }
+    auto getFrameBufferPtr() const { return framebufferPtr; }
+    auto getModelPtr() const { return modelPtr.get(); }
+
+private:
+    std::unique_ptr<Model> modelPtr;
+    std::shared_ptr<Camera> cameraPtr;
+    std::shared_ptr<FrameBuffer> framebufferPtr;
 };
