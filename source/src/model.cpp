@@ -1,6 +1,8 @@
 #include <iostream>
 #include <memory>
-#include <model.hpp>
+
+#include "model.hpp"
+
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader/tiny_obj_loader.h"
 

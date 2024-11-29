@@ -1,12 +1,13 @@
 #pragma once
 
 #include <GLFW/glfw3.h>
-#include <frame_buffer.hpp>
-#include <shader.hpp>
-#include <camera.hpp>
+
+#include "buffer.hpp"
+#include "shader.hpp"
+#include "camera.hpp"
 
 struct curContext {
-    FrameBuffer *fbPtr;
+    Buffer *bufferPtr;
     Uniforms *uniformsPtr;
     Camera *cameraPtr;
     float *lastXPtr, *lastYPtr;
@@ -26,7 +27,7 @@ public:
 
     Window(const size_t &width, const size_t &height, const char *title);
 
-    void drawFrameBuffer(const FrameBuffer &fb) const;
+    void drawFrameBuffer(const Buffer &fb) const;
 
     size_t getWidth() const { return width; }
     size_t getHeight() const { return height; }

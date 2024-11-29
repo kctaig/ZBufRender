@@ -1,8 +1,9 @@
-#include <glad/glad.h>
-#include <Window.hpp>
 #include <algorithm>
 #include <iostream>
-#include <render.hpp>
+#include <glad/glad.h>
+
+#include "window.hpp"
+#include "render.hpp"
 
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
@@ -23,7 +24,7 @@ Window::Window(const size_t &width, const size_t &height, const char *title)
 }
 
 void Window::framebufferCallback(GLFWwindow *window, int width, int height) {
-    context.fbPtr->reCreate(width, height, glm::vec3(0));
+    context.bufferPtr->bufferResize(width, height, glm::vec3(0));
     context.uniformsPtr->screenHeight = height;
     context.uniformsPtr->screenWidth = width;
 }
@@ -101,7 +102,7 @@ void Window::init() {
     }
 }
 
-void Window::drawFrameBuffer(const FrameBuffer &fb) const {
+void Window::drawFrameBuffer(const Buffer &fb) const {
     HWND hwnd = glfwGetWin32Window(window.get());
     HDC hdcWindow = GetDC(hwnd);
     if (!hdcWindow) {
@@ -109,7 +110,7 @@ void Window::drawFrameBuffer(const FrameBuffer &fb) const {
         return;
     }
 
-    // 获取 FrameBuffer 和窗口尺寸
+    // 获取 Buffer 和窗口尺寸
     const int fbHeight = static_cast<int>(fb.getHeight());
     const int fbWidth = static_cast<int>(fb.getWidth());
     const int screenheight = (min(static_cast<int>(height), fbHeight));

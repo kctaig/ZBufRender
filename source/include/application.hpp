@@ -1,7 +1,7 @@
 #pragma once
 
-#include <render.hpp>
-#include <window.hpp>
+#include "render.hpp"
+#include "window.hpp"
 
 class Application {
 public:

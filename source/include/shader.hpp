@@ -1,13 +1,12 @@
 #pragma once
 
-#include <glm/glm.hpp>
-#include <model.hpp>
-#include <memory>
 #include <vector>
 #include <ext/matrix_clip_space.hpp>
+#include <glm/glm.hpp>
 
-#include "Camera.hpp"
-#include "frame_buffer.hpp"
+#include "buffer.hpp"
+#include "camera.hpp"
+#include "model.hpp"
 
 struct FragMesh {
     std::vector<glm::vec4> screenMesh;
@@ -30,7 +29,7 @@ struct Uniforms {
     int screenWidth;
     int screenHeight;
 
-    void updateMVP(const Camera &cam, const FrameBuffer &fb) {
+    void updateMVP(const Camera &cam, const Buffer &fb) {
         screenWidth = static_cast<int>(fb.getWidth());
         screenHeight = static_cast<int>(fb.getHeight());
         view = cam.GetViewMatrix();

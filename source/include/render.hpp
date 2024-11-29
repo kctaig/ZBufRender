@@ -1,7 +1,7 @@
 #pragma once
 
-#include <bbox.hpp>
-#include <frame_buffer.hpp>
+#include "bbox.hpp"
+#include "buffer.hpp"
 
 class Render {
 public:
@@ -9,10 +9,10 @@ public:
 
     ~Render() = default;
 
-    Render(std::unique_ptr<Model> mPtr, std::shared_ptr<Camera> cPtr, std::shared_ptr<FrameBuffer> fbPtr) {
+    Render(std::unique_ptr<Model> mPtr, std::shared_ptr<Camera> cPtr, std::shared_ptr<Buffer> fbPtr) {
         modelPtr = std::move(mPtr);
         cameraPtr = cPtr;
-        framebufferPtr = fbPtr;
+        bufferPtr = fbPtr;
     }
 
     void processTriangles(const Uniforms &uniforms,
@@ -20,25 +20,27 @@ public:
                           bool useParallel = true) const;
 
     // ÒÑ·ÏÆú
-    void draw(const Uniforms &uniforms,
-              const Shader &shader) const;
+    // void draw(const Uniforms &uniforms,
+    //           const Shader &shader) const;
 
-    void rasterization(const Shader &shader,
-                       const Uniforms &uniforms,
-                       const FragMesh &fragMesh) const;
+    void regularRaster(const FragMesh &fragMesh, const Shader &shader,const Uniforms& uniforms) const;
+
+    void scanLineRaster(const FragMesh &fragMesh, const Shader &shader,const Uniforms& uniforms) const;
 
     static glm::vec3 calculateWeights(
         const FragMesh &fragMesh,
         const glm::vec2 &screenPoint);
 
+    void renderPixel(const glm::ivec2 pixel,const FragMesh& fragMesh, const Shader &shader,const Uniforms &uniforms) const;
+
     static constexpr float EPSILON = std::numeric_limits<float>::epsilon();
 
     auto getCameraPtr() const { return cameraPtr; }
-    auto getFrameBufferPtr() const { return framebufferPtr; }
+    auto getBufferPtr() const { return bufferPtr; }
     auto getModelPtr() const { return modelPtr.get(); }
 
 private:
     std::unique_ptr<Model> modelPtr;
     std::shared_ptr<Camera> cameraPtr;
-    std::shared_ptr<FrameBuffer> framebufferPtr;
+    std::shared_ptr<Buffer> bufferPtr;
 };

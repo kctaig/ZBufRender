@@ -1,4 +1,4 @@
-#include <bbox.hpp>
+#include "bbox.hpp"
 
 void BBOX::updateBBox(const FragMesh &fragMesh) {
     int minx = static_cast<int>(floor(fragMesh.screenMesh[0].x));
