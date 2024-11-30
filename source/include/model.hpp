@@ -19,7 +19,7 @@ public:
 
     ~Model() = default;
 
-    Model( std::string dirPath,  std::string fileName);
+    Model(std::string dirPath, std::string fileName);
 
     const std::vector<Mesh> &getTriangles() const { return triangles; }
     const std::vector<Vertex> &getVertices() const { return vertices; }
@@ -27,6 +27,8 @@ public:
     void setTriangles(const std::vector<Mesh> &triangles) { this->triangles = triangles; }
 
     void modelInfo() const;
+
+    // glm::vec3 calculateNormal(const Mesh &mesh) const;
 
 private:
     std::vector<Mesh> triangles;

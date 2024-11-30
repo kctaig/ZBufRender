@@ -5,9 +5,11 @@
 
 class Application {
 public:
-    Application() { init(); }
+    Application() = default;
 
     ~Application() = default;
+
+    Application(size_t width, size_t height, RasterType rasterType) { init(width, height, rasterType); }
 
     void run() const;
 
@@ -17,5 +19,5 @@ private:
     std::shared_ptr<Uniforms> uniformsPtr;
     std::unique_ptr<Render> renderPtr;
 
-    void init();
+    void init(size_t width, size_t height, RasterType rasterType);
 };

@@ -1,5 +1,4 @@
 #include "shader.hpp"
-#include "render.hpp"
 
 glm::vec4 vertexShader(const Vertex &vertex, const Uniforms &uniforms) {
     // clip pos

@@ -4,6 +4,7 @@
 
 #include "render.hpp"
 #include "model.hpp"
+#include "scan_line_buffer.hpp"
 
 // void Render::draw(const Uniforms &uniforms,
 //                   const Shader &shader) const {
@@ -14,7 +15,7 @@
 // #define USE_OMP_FRO_PARALLEL true
 //
 // #if USE_OMP_FRO_PARALLEL
-//     std::vector<FragMesh> fragMeshes(omp_get_max_threads(), {std::vector<glm::vec4>(3), 3});
+//     std::vector<FragMesh> fragMeshes(omp_get_max_threads(), {std::vector<glm::vec4>(3), std::vector<glm::vec3>(3)});
 //
 // #pragma omp parallel
 //     {
@@ -26,7 +27,7 @@
 //             size_t vertexIndex = 0;
 //             for (const auto &index: tri.indices) {
 //                 const auto &vertex = vertices[index];
-//                 fragMeshes[threadId].screenMesh[vertexIndex] = shader.getVertexShader()(vertex, uniforms);
+//                 fragMeshes[threadId].v2d[vertexIndex] = shader.getVertexShader()(vertex, uniforms);
 //                 vertexIndex++;
 //             }
 //             rasterization(shader, uniforms, fragMeshes[threadId]);
@@ -41,7 +42,7 @@
 //         size_t vertexIndex = 0;
 //         for (const auto& index : tri.indices) {
 //             const auto& vertex = vertices[index];
-//             fragMesh->screenMesh[vertexIndex] = shader.getVertexShader()(vertex, uniforms);
+//             fragMesh->v2d[vertexIndex] = shader.getVertexShader()(vertex, uniforms);
 //             vertexIndex++;
 //         }
 //         rasterization(shader, uniforms, *fragMesh);
@@ -62,7 +63,10 @@ void Render::processTriangles(const Uniforms &uniforms,
     // std::cout << "maxThreads: " << maxThreads << std::endl;
 
     // assign FragMesh for thread
-    std::vector<FragMesh> fragMeshes(maxThreads, FragMesh{std::vector<glm::vec4>(3), 3});
+    std::vector<FragMesh> fragMeshes(maxThreads, FragMesh{
+                                         std::vector<glm::vec4>(3),
+                                         std::vector<glm::vec3>(3), 3
+                                     });
 
 #pragma omp parallel if(useParallel)
     {
@@ -76,8 +80,9 @@ void Render::processTriangles(const Uniforms &uniforms,
             // vertex shader
             for (const auto &index: tri.indices) {
                 const auto &vertex = vertices[index];
-                localFragMesh.screenMesh[vertexIndex++] = shader.getVertexShader()(vertex, uniforms);
+                localFragMesh.v2d[vertexIndex++] = shader.getVertexShader()(vertex, uniforms);
             }
+
             // raster and shader
             regularRaster(localFragMesh, shader, uniforms);
         }
@@ -98,13 +103,30 @@ void Render::regularRaster(const FragMesh &fragMesh,
     }
 }
 
-void Render::scanLineRaster(const FragMesh &fragMesh, const Shader &shader, const Uniforms &uniforms) const {
+void Render::scanLineRender(const Shader &shader, const Uniforms &uniforms) const {
+    // auto scanLineBufferPtr = std::dynamic_pointer_cast<ScanLineZBuffer>(bufferPtr);
+    // init pat
+    const auto &vertices = modelPtr->getVertices();
+    const auto &triangles = modelPtr->getTriangles();
+    FragMesh fragMesh;
+    for (int i = 0; i < triangles.size(); ++i) {
+        const auto &tri = triangles[i];
+        size_t vertexIndex = 0;
+        fragMesh.vertexNum = 3;
+        for (const auto &index: tri.indices) {
+            const auto &vertex = vertices[index];
+            fragMesh.v2d[vertexIndex++] = shader.getVertexShader()(vertex, uniforms);
+            fragMesh.v3d[vertexIndex++] = vertex.pos;
+        }
+
+    }
 }
 
-void Render::renderPixel(const glm::ivec2 pixel,
+void Render::renderPixel(glm::ivec2 pixel,
                          const FragMesh &fragMesh,
                          const Shader &shader,
                          const Uniforms &uniforms) const {
+    auto regularbufferPtr = std::dynamic_pointer_cast<RegularZBuffer>(bufferPtr);
     const int x = pixel.x;
     const int y = pixel.y;
     const glm::vec2 screenPoint(static_cast<float>(x) + .5f, static_cast<float>(y) + .5f);
@@ -115,25 +137,25 @@ void Render::renderPixel(const glm::ivec2 pixel,
         return;
     }
     // depth test
-    const float depth = fragMesh.screenMesh[0].z * weights[0] +
-                        fragMesh.screenMesh[1].z * weights[1] +
-                        fragMesh.screenMesh[2].z * weights[2];
-    if (depth > bufferPtr->getDepth(x, y)) {
+    const float depth = fragMesh.v2d[0].z * weights[0] +
+                        fragMesh.v2d[1].z * weights[1] +
+                        fragMesh.v2d[2].z * weights[2];
+    if (depth > regularbufferPtr->getDepth(x, y)) {
         return;
     }
     // fragment shader
     const glm::vec3 color = shader.getFragmentShader()(glm::vec4(x, y, 0.f, 1.f), uniforms);
-    bufferPtr->setPixel(x, y, color);
-    bufferPtr->setDepth(x, y, depth);
+    regularbufferPtr->setPixel(x, y, color);
+    regularbufferPtr->setDepth(x, y, depth);
 }
 
 glm::vec3 Render::calculateWeights(const FragMesh &fragMesh,
                                    const glm::vec2 &screenPoint) {
     glm::vec3 weights(0.f), screenWeights(0.f);
     const glm::vec4 fragCoords[3] = {
-        fragMesh.screenMesh[0],
-        fragMesh.screenMesh[1],
-        fragMesh.screenMesh[2]
+        fragMesh.v2d[0],
+        fragMesh.v2d[1],
+        fragMesh.v2d[2]
     };
 
     // 计算边向量和屏幕点向量

@@ -78,3 +78,10 @@ void Model::modelInfo() const {
         std::cout << this->triangles[j].indices[2] << std::endl;
     }
 }
+
+// glm::vec3 Model::calculateNormal(const Mesh &mesh) const {
+//     const auto v0 = vertices[mesh.indices[0]].pos;
+//     const auto v1 = vertices[mesh.indices[1]].pos;
+//     const auto v2 = vertices[mesh.indices[2]].pos;
+//     return normalize(glm::cross(v1 - v0, v2 - v0));
+// }

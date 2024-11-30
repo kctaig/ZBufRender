@@ -7,7 +7,7 @@
 #include "camera.hpp"
 
 struct curContext {
-    Buffer *bufferPtr;
+    ZBuffer *bufferPtr;
     Uniforms *uniformsPtr;
     Camera *cameraPtr;
     float *lastXPtr, *lastYPtr;
@@ -27,7 +27,8 @@ public:
 
     Window(const size_t &width, const size_t &height, const char *title);
 
-    void drawFrameBuffer(const Buffer &fb) const;
+    // ÒÑ·ÏÆú
+    // void drawFrameBuffer(const ZBuffer &fb) const;
 
     size_t getWidth() const { return width; }
     size_t getHeight() const { return height; }

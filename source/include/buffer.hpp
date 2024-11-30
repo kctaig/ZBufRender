@@ -3,37 +3,51 @@
 #include <glm/glm.hpp>
 #include <memory>
 
-class Buffer {
+class ZBuffer {
 public:
-    Buffer() = default;
+    ZBuffer() = default;
 
-    ~Buffer() = default;
+    virtual ~ZBuffer() = default;
 
-    Buffer(size_t width, size_t height);
+    ZBuffer(size_t width, size_t height): width(width), height(height) {
+    }
 
     size_t getWidth() const { return width; }
     size_t getHeight() const { return height; }
 
-    size_t getIndex(size_t x, size_t y) const;
+    auto &getPixelPtr() { return pixelPtr; }
+    auto &getDepthPtr() { return depthPtr; }
 
-    float getDepth(size_t x, size_t y) const { return (*depthsPtr)[getIndex(x, y)]; }
-    void setDepth(size_t x, size_t y, float depth) { (*depthsPtr)[getIndex(x, y)] = depth; }
+    glm::u8vec3 toU8Vec3(const glm::vec3 &color);
 
-    void setPixel(size_t x, size_t y, glm::vec3 color) { (*colorsPtr)[getIndex(x, y)] = toU8Vec3(color); }
+    virtual void clear(glm::vec3 color) = 0;
 
-    void clear(glm::vec3 color = {0, 0, 0});
+    virtual void bufferResize(size_t w, size_t h, glm::vec3 color) = 0;
 
-    void bufferResize(size_t w, size_t h, glm::vec3 color = {0, 0, 0});
+protected:
+    size_t width{}, height{};
+    std::unique_ptr<std::vector<float> > depthPtr{};
+    std::unique_ptr<std::vector<glm::u8vec3> > pixelPtr{};
+};
 
-    const glm::u8vec3 &getColor(size_t x, size_t y) const { return (*colorsPtr)[getIndex(x, y)]; }
 
-    const std::unique_ptr<std::vector<glm::u8vec3> > &getColorsPtr() { return colorsPtr; }
+class RegularZBuffer : public ZBuffer {
+public:
+    RegularZBuffer() = default;
 
-    static glm::u8vec3 toU8Vec3(const glm::vec3 &color);
+    RegularZBuffer(size_t width, size_t height);
+
+    const auto getIndex(size_t x, size_t y) const { return y * width + x; };
+    const auto &getDepth(size_t x, size_t y) const { return (*depthPtr)[getIndex(x, y)]; }
+    const auto &getColor(size_t x, size_t y) const { return (*pixelPtr)[getIndex(x, y)]; }
+
+    void setDepth(size_t x, size_t y, float depth) { (*depthPtr)[getIndex(x, y)] = depth; }
+    void setPixel(size_t x, size_t y, glm::vec3 color) { (*pixelPtr)[getIndex(x, y)] = toU8Vec3(color); }
+
+    void clear(glm::vec3 color) override;
+
+    void bufferResize(size_t w, size_t h, glm::vec3 color) override;
 
 private:
-    size_t width{}, height{};
     size_t pixelCount{};
-    std::unique_ptr<std::vector<float> > depthsPtr{};
-    std::unique_ptr<std::vector<glm::u8vec3> > colorsPtr{};
 };

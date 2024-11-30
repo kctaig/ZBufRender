@@ -4,13 +4,17 @@
 #include <ext/matrix_clip_space.hpp>
 #include <glm/glm.hpp>
 
-#include "buffer.hpp"
 #include "camera.hpp"
 #include "model.hpp"
 
 struct FragMesh {
-    std::vector<glm::vec4> screenMesh;
+    std::vector<glm::vec4> v2d;
+    std::vector<glm::vec3> v3d;
     size_t vertexNum;
+
+    glm::vec3 calculateNormal() const {
+        return normalize(glm::cross(v3d[1] - v3d[0], v3d[2] - v3d[0]));
+    }
 };
 
 struct Uniforms {
@@ -29,9 +33,9 @@ struct Uniforms {
     int screenWidth;
     int screenHeight;
 
-    void updateMVP(const Camera &cam, const Buffer &fb) {
-        screenWidth = static_cast<int>(fb.getWidth());
-        screenHeight = static_cast<int>(fb.getHeight());
+    void updateMVP(const Camera &cam, const size_t w, const size_t h) {
+        screenWidth = static_cast<int>(w);
+        screenHeight = static_cast<int>(h);
         view = cam.GetViewMatrix();
         projection = glm::perspective(glm::radians(cam.Zoom),
                                       static_cast<float>(screenWidth) / static_cast<float>(screenHeight),

@@ -6,7 +6,9 @@ source_group(
         FILES ${SOURCE_FILES} ${HEADER_FILES} main.cpp
 )
 
-add_executable(${TARGET_NAME} main.cpp ${SOURCE_FILES} ${HEADER_FILES})
+add_executable(${TARGET_NAME} main.cpp ${SOURCE_FILES} ${HEADER_FILES}
+        include/scan_line_buffer.hpp
+        src/scan_line_buffer.cpp)
 
 set(THIRD_PARTY_DIR "${CMAKE_SOURCE_DIR}/3rdparty")
 set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
