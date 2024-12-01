@@ -50,7 +50,7 @@ public:
 
     ~Shader() = default;
 
-    using vertexShader = glm::vec4 (*)(const Vertex &, const Uniforms &);
+    using vertexShader = glm::vec4 (*)(Vertex &, const Uniforms &);
     using fragmentShader = glm::vec3 (*)(const glm::vec4 &, const Uniforms &);
 
     Shader(const vertexShader &vs, const fragmentShader &fs)
@@ -65,6 +65,6 @@ private:
     fragmentShader fs;
 };
 
-glm::vec4 vertexShader(const Vertex &vertex, const Uniforms &uniforms);
+glm::vec4 vertexShader(Vertex &vertex, const Uniforms &uniforms);
 
 glm::vec3 fragmentShader(const glm::vec4 &fragPos, const Uniforms &uniforms);

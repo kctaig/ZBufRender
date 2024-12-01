@@ -2,7 +2,7 @@
 
 #include <GLFW/glfw3.h>
 
-#include "buffer.hpp"
+#include "zbuffer.hpp"
 #include "shader.hpp"
 #include "camera.hpp"
 
