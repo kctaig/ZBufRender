@@ -6,6 +6,11 @@
 
 void Application::run() const {
 	// render loop
+
+	float angle = 0.0f;
+	float angularSpeed = 20.0f; // 每秒旋转20度
+	glm::vec3 rotationAxis = glm::vec3(0.0f, 1.0f, 0.0f); // 绕y轴旋转
+
 	while (!glfwWindowShouldClose(windowPtr->getWindowPtr())) {
 
 		auto start = std::chrono::high_resolution_clock::now();
@@ -19,12 +24,17 @@ void Application::run() const {
 		// get input
 		Window::processInput(windowPtr->getWindowPtr());
 
+		angle += angularSpeed * windowPtr->deltaTime;
+		glm::mat4 model = glm::mat4(1.0f);
+		model = glm::rotate(model, glm::radians(angle), rotationAxis);
+		uniformsPtr->updateModel(model);
 		uniformsPtr->updateMVP(*renderPtr->getCameraPtr(),
-			renderPtr->getBufferPtr()->getWidth(),
-			renderPtr->getBufferPtr()->getHeight());
-
-		//renderPtr->processTriangles(*uniformsPtr, *shaderPtr, true);
-		renderPtr->scanLineRender(*shaderPtr, *uniformsPtr);
+								renderPtr->getBufferPtr()->getWidth(),
+								renderPtr->getBufferPtr()->getHeight());
+		if (renderPtr->getRasterType() == REGULAR)
+			renderPtr->processTriangles(*uniformsPtr, *shaderPtr, false);
+		else if (renderPtr->getRasterType() == SCANLINE)
+			renderPtr->scanLineRender(*shaderPtr, *uniformsPtr);
 
 		// 设置像素操作参数
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);

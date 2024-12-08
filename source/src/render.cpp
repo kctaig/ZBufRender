@@ -64,7 +64,7 @@ void Render::scanLineRender(const Shader& shader,
 	// construct pat
 	const auto& vertices = modelPtr->getVertices();
 	const auto& triangles = modelPtr->getTriangles();
-
+	 
 	FragMesh fragMesh{ std::vector<glm::vec4>(3),std::vector<glm::vec3>(3),3 };
 
 	// construct CPT
@@ -92,7 +92,7 @@ void Render::scanLineRender(const Shader& shader,
 		for (int i = 0; i < scanLineBufferPtr->getAETPtr()->size(); i++)
 		{
 
-			auto& aetNode = (*scanLineBufferPtr->getAETPtr())[i];
+			auto& aetNode = scanLineBufferPtr->getAETPtr()->at(i);
 			float z = aetNode.zl;
 
 			int beginX = aetNode.xl < 0 ? 0 : aetNode.xl;
@@ -134,6 +134,7 @@ void Render::renderPixel(glm::ivec2 pixel,
 	const float depth = fragMesh.v2d[0].z * weights[0] +
 		fragMesh.v2d[1].z * weights[1] +
 		fragMesh.v2d[2].z * weights[2];
+
 	if (depth > regularbufferPtr->getDepth(x, y)) {
 		return;
 	}
@@ -175,7 +176,7 @@ glm::vec3 Render::calculateWeights(const FragMesh& fragMesh,
 
 	// 如果重心坐标无效（小于0或者大于1），则跳过该点
 	if (s < -EPSILON || t < -EPSILON || s + t > 1.0f + EPSILON) {
-		return glm::vec3(0.f); // 该点不在三角形内
+		return glm::vec3(-1.f); // 该点不在三角形内
 	}
 
 	// 计算每个顶点的 w 值

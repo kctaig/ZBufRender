@@ -23,7 +23,7 @@ public:
 	glm::u8vec3 toU8Vec3(const glm::vec3& color);
 
 	const auto getIndex(size_t x, size_t y) const { return y * width + x; };
-	const auto& getDepth(size_t x, size_t y) const { return (*depthPtr)[getIndex(x, y)]; }
+	const auto getDepth(size_t x, size_t y) const { return (*depthPtr)[getIndex(x, y)]; }
 	const auto& getColor(size_t x, size_t y) const { return (*pixelPtr)[getIndex(x, y)]; }
 
 	void setDepth(size_t x, size_t y, float depth) { (*depthPtr)[getIndex(x, y)] = depth; }

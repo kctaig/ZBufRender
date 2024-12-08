@@ -13,7 +13,8 @@ struct FragMesh {
     size_t vertexNum;
 
     glm::vec3 calculateNormal() const {
-        return normalize(glm::cross(v3d[1] - v3d[0], v3d[2] - v3d[0]));
+        //return normalize(glm::cross(v3d[1] - v3d[0], v3d[2] - v3d[0]));
+        return normalize(glm::cross(glm::vec3(v2d[1]) - glm::vec3(v2d[0]), glm::vec3(v2d[2]) - glm::vec3(v2d[0])));
     }
 };
 
@@ -42,6 +43,10 @@ struct Uniforms {
                                       0.1f,
                                       100.0f);
     }
+
+	void updateModel(const glm::mat4& m) {
+		model = m;
+	}
 };
 
 class Shader {

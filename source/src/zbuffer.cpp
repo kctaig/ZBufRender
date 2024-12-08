@@ -52,7 +52,7 @@ void ScanLineZBuffer::clear(glm::vec3 color) {
 
 void ScanLineZBuffer::fragMeshToCPT(const FragMesh& fragMesh, const int id) const {
 	auto normal = fragMesh.calculateNormal();
-	if (normal.z == 0.f) return;
+	//if (normal.z == 0.f) return;
 
 	auto v2d = fragMesh.v2d;
 	auto v3d = fragMesh.v3d;
@@ -171,7 +171,7 @@ void ScanLineZBuffer::updateAET() {
 
 			aetNode.xl += aetNode.dxl;
 			aetNode.xr += aetNode.dxr;
-			aetNode.zl += aetNode.dzy + aetNode.dzx * aetNode.dxl;
+			aetNode.zl -= aetNode.dzy + aetNode.dzx * aetNode.dxl;
 		}
 	}
 }

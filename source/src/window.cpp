@@ -89,11 +89,11 @@ void Window::init() {
 
     glfwMakeContextCurrent(window.get());
     glfwSetFramebufferSizeCallback(window.get(), framebufferCallback);
-    glfwSetCursorPosCallback(window.get(), mouseCallback);
+    //glfwSetCursorPosCallback(window.get(), mouseCallback);
     glfwSetScrollCallback(window.get(), scrollCallback);
 
     // tell GLFW to capture our mouse
-    // glfwSetInputMode(window.get(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window.get(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // glad: load all OpenGL function pointers
     if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {

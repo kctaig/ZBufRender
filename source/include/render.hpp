@@ -45,6 +45,7 @@ public:
 	auto getBufferPtr() const { return bufferPtr; }
 	auto getModelPtr() const { return modelPtr.get(); }
 
+	auto getRasterType() const { return rasterType; }
 
 private:
 	std::unique_ptr<Model> modelPtr;

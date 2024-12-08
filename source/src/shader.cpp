@@ -5,6 +5,7 @@ glm::vec4 vertexShader(Vertex& vertex, const Uniforms& uniforms) {
 	// clip pos
 	const glm::vec4 clipPos = uniforms.projection * uniforms.view * uniforms.model * glm::vec4(vertex.pos, 1.f);
 
+	// 更新裁剪后的三维坐标
 	vertex.pos = glm::vec3(clipPos);
 
 	// NDC pos
