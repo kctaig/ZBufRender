@@ -1,26 +1,30 @@
 #include "shader.hpp"
+#include <iostream>
 
 // todo: return type to FragMesh
-glm::vec4 vertexShader(Vertex& vertex, const Uniforms& uniforms) {
-	// clip pos
-	const glm::vec4 clipPos = uniforms.projection * uniforms.view * uniforms.model * glm::vec4(vertex.pos, 1.f);
+void vertexShader(std::vector<glm::vec4>& vertices, const Uniforms& uniforms) {
+	for (auto& vertex : vertices) {
+		auto clipPos = uniforms.projection * uniforms.view * uniforms.model * vertex;
+		// NDC pos
+		const float w = clipPos.w;
+		assert(w != 0.0f);
+		glm::vec4 NDC = clipPos / w;
+		//NDC.w = 1.f / w;
+		NDC.w = w;
 
-	// 更新裁剪后的三维坐标
-	vertex.pos = glm::vec3(clipPos);
+		// fragment pos
+		glm::vec4 fragPos = NDC;
+		fragPos.x = (NDC.x + 1.f) * .5f * static_cast<float>(uniforms.screenWidth);
+		fragPos.y = (NDC.y + 1.f) * .5f * static_cast<float>(uniforms.screenHeight);
+		//fragPos.z = (NDC.z + 1.f) * .5f;
 
-	// NDC pos
-	const float w = clipPos.w;
-	assert(w != 0.0f);
-	glm::vec4 NDC = clipPos / w;
-	NDC.w = 1.f / w;
+		//std::cout << fragPos.z << std::endl;
 
-	// fragment pos
-	glm::vec4 fragPos = NDC;
-	fragPos.x = (NDC.x + 1.f) * .5f * static_cast<float>(uniforms.screenWidth);
-	fragPos.y = (NDC.y + 1.f) * .5f * static_cast<float>(uniforms.screenHeight);
-	fragPos.z = (NDC.z + 1.f) * .5f;
+		fragPos.x = static_cast<int>(fragPos.x + .5f);
+		fragPos.y = static_cast<int>(fragPos.y + .5f);
 
-	return fragPos;
+		vertex = fragPos;
+	}
 }
 
 glm::vec3 fragmentShader(const glm::vec4& fragPos, const Uniforms& uniforms) {

@@ -19,7 +19,7 @@ public:
 		rasterType = type;
 	}
 
-	void processTriangles(const Uniforms& uniforms,
+	void regularRender(const Uniforms& uniforms,
 		const Shader& shader,
 		bool useParallel = true) const;
 

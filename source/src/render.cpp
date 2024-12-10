@@ -6,11 +6,17 @@
 #include "model.hpp"
 #include "render.hpp"
 
-void Render::processTriangles(const Uniforms& uniforms,
+void Render::regularRender(const Uniforms& uniforms,
 	const Shader& shader,
 	bool useParallel) const {
 	const auto& vertices = modelPtr->getVertices();
 	const auto& triangles = modelPtr->getTriangles();
+	std::vector<glm::vec4> screenVertices;
+	for (const Vertex& vertex : vertices) {
+		screenVertices.push_back(glm::vec4(vertex.pos, 1.0));
+	}
+	// 对所有顶点进行变换
+	shader.getVertexShader()(screenVertices, uniforms);
 
 	// number of thread
 	const int maxThreads = useParallel ? omp_get_max_threads() : 1;
@@ -34,7 +40,10 @@ void Render::processTriangles(const Uniforms& uniforms,
 			// vertex shader
 			for (const auto& index : tri.indices) {
 				auto vertex = vertices[index];
-				localFragMesh.v2d[vertexIndex++] = shader.getVertexShader()(vertex, uniforms);
+				//localFragMesh.v2d[vertexIndex++] = shader.getVertexShader()(vertex, uniforms);
+				localFragMesh.v2d[vertexIndex] = screenVertices[index];
+				localFragMesh.v3d[vertexIndex] = vertex.pos;
+				vertexIndex++;
 			}
 
 			// raster and shader
@@ -59,23 +68,27 @@ void Render::regularRaster(const FragMesh& fragMesh,
 
 void Render::scanLineRender(const Shader& shader,
 	const Uniforms& uniforms) const {
-    auto scanLineBufferPtr = std::dynamic_pointer_cast<ScanLineZBuffer>(bufferPtr);
+	auto scanLineBufferPtr = std::dynamic_pointer_cast<ScanLineZBuffer>(bufferPtr);
 
-	// construct pat
 	const auto& vertices = modelPtr->getVertices();
 	const auto& triangles = modelPtr->getTriangles();
-	 
-	FragMesh fragMesh{ std::vector<glm::vec4>(3),std::vector<glm::vec3>(3),3 };
+	std::vector<glm::vec4> screenVertices;
+	for (const Vertex& vertex : vertices) {
+		screenVertices.push_back(glm::vec4(vertex.pos, 1.0));
+	}
+	// 对所有顶点进行变换
+	shader.getVertexShader()(screenVertices, uniforms);
 
-	// construct CPT
+	// 建立 fragMesh
+	FragMesh fragMesh{ std::vector<glm::vec4>(3),std::vector<glm::vec3>(3),3 };
 	for (int i = 0; i < triangles.size(); ++i) {
 		const auto& tri = triangles[i];
 		size_t vertexIndex = 0;
 		// construct fragMesh
 		for (const auto& index : tri.indices) {
-			auto vertex = vertices[index];
-			fragMesh.v2d[vertexIndex] = shader.getVertexShader()(vertex, uniforms);
-			fragMesh.v3d[vertexIndex++] = vertex.pos;
+			fragMesh.v3d[vertexIndex] = vertices[index].pos;
+			fragMesh.v2d[vertexIndex] = screenVertices[index];
+			vertexIndex++;
 		}
 		// construct CPTNOde
 		scanLineBufferPtr->fragMeshToCPT(fragMesh, i);
@@ -91,7 +104,6 @@ void Render::scanLineRender(const Shader& shader,
 		// render scan line pixel
 		for (int i = 0; i < scanLineBufferPtr->getAETPtr()->size(); i++)
 		{
-
 			auto& aetNode = scanLineBufferPtr->getAETPtr()->at(i);
 			float z = aetNode.zl;
 
@@ -102,7 +114,10 @@ void Render::scanLineRender(const Shader& shader,
 			// 增量式深度更新
 			for (int x = beginX; x <= endX; x++)
 			{
-				glm::vec3 color = shader.getFragmentShader()(glm::vec4(x, y, 0.f, 1.f), uniforms);
+				//glm::vec3 color = shader.getFragmentShader()(glm::vec4(x, y, 0.f, 1.f), uniforms);
+				auto color = aetNode.cptNodePtr->color;
+				color = (color + 1.f) / 2.f;
+				//auto color = glm::vec3(1.f);
 				if (z < scanLineBufferPtr->getDepth(x))
 				{
 					scanLineBufferPtr->setPixel(x, y, color);
@@ -139,7 +154,9 @@ void Render::renderPixel(glm::ivec2 pixel,
 		return;
 	}
 	// fragment shader
-	const glm::vec3 color = shader.getFragmentShader()(glm::vec4(x, y, 0.f, 1.f), uniforms);
+	//const glm::vec3 color = shader.getFragmentShader()(glm::vec4(x, y, 0.f, 1.f), uniforms);
+	auto color = fragMesh.calculateV3dNormal();
+	color = (color + 1.f) / 2.f;
 	regularbufferPtr->setPixel(x, y, color);
 	regularbufferPtr->setDepth(x, y, depth);
 }
@@ -162,7 +179,7 @@ glm::vec3 Render::calculateWeights(const FragMesh& fragMesh,
 	const float det = ab.x * ac.y - ab.y * ac.x;
 
 	if (std::abs(det) < EPSILON) {
-		return glm::vec3(0.f); // 如果行列式太小，认为点不在三角形内
+		return glm::vec3(-EPSILON - 1); // 如果行列式太小，认为点不在三角形内
 	}
 
 	// 计算重心坐标
@@ -176,7 +193,7 @@ glm::vec3 Render::calculateWeights(const FragMesh& fragMesh,
 
 	// 如果重心坐标无效（小于0或者大于1），则跳过该点
 	if (s < -EPSILON || t < -EPSILON || s + t > 1.0f + EPSILON) {
-		return glm::vec3(-1.f); // 该点不在三角形内
+		return glm::vec3(-EPSILON - 1); // 该点不在三角形内
 	}
 
 	// 计算每个顶点的 w 值

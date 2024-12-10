@@ -9,10 +9,9 @@ void Application::run() const {
 
 	float angle = 0.0f;
 	float angularSpeed = 20.0f; // 每秒旋转20度
-	glm::vec3 rotationAxis = glm::vec3(0.0f, 1.0f, 0.0f); // 绕y轴旋转
+	glm::vec3 rotationAxis = glm::vec3(0.0f, 1.0f, 0.0f);
 
 	while (!glfwWindowShouldClose(windowPtr->getWindowPtr())) {
-
 		auto start = std::chrono::high_resolution_clock::now();
 
 		// set time
@@ -24,15 +23,18 @@ void Application::run() const {
 		// get input
 		Window::processInput(windowPtr->getWindowPtr());
 
-		angle += angularSpeed * windowPtr->deltaTime;
+		// rotate
+		//angle += angularSpeed * windowPtr->deltaTime;
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::rotate(model, glm::radians(angle), rotationAxis);
 		uniformsPtr->updateModel(model);
 		uniformsPtr->updateMVP(*renderPtr->getCameraPtr(),
-								renderPtr->getBufferPtr()->getWidth(),
-								renderPtr->getBufferPtr()->getHeight());
+			renderPtr->getBufferPtr()->getWidth(),
+			renderPtr->getBufferPtr()->getHeight());
+
+		// render type
 		if (renderPtr->getRasterType() == REGULAR)
-			renderPtr->processTriangles(*uniformsPtr, *shaderPtr, false);
+			renderPtr->regularRender(*uniformsPtr, *shaderPtr, true);
 		else if (renderPtr->getRasterType() == SCANLINE)
 			renderPtr->scanLineRender(*shaderPtr, *uniformsPtr);
 
@@ -59,8 +61,8 @@ void Application::run() const {
 }
 
 void Application::init(size_t width, size_t height, RasterType rasterType) {
-	auto modelPtr = std::make_unique<Model>(R"(D:\code\ZBufRender\asserts)", "bunny.obj"); // armadillo
-	auto cameraPtr = std::make_shared<Camera>(glm::vec3(0.0f, 0.0f, 6.0f));
+	auto modelPtr = std::make_unique<Model>(R"(D:\code\ZBufRender\asserts)", "mesh3.obj"); // armadillo
+	auto cameraPtr = std::make_shared<Camera>(glm::vec3(0.0f, 0.f, 4.0f));
 	std::shared_ptr<ZBuffer> bufferPtr;
 	if (rasterType == REGULAR) {
 		bufferPtr = std::make_shared<RegularZBuffer>(width, height);

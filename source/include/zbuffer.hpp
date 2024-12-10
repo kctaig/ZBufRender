@@ -39,7 +39,6 @@ protected:
 	std::unique_ptr<std::vector<glm::u8vec3> > pixelPtr{};
 };
 
-
 class RegularZBuffer : public ZBuffer {
 public:
 	RegularZBuffer() = default;
@@ -81,4 +80,3 @@ private:
 	std::unique_ptr<std::vector<std::vector<CPTNode> > > cptPtr{}; // 分类多边形表指针
 	std::unique_ptr<std::vector<AETNode> > aetPtr{};
 };
-

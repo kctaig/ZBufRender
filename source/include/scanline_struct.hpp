@@ -15,7 +15,7 @@ struct CETNode {
 	float z;
 
 	// todo: type transfer
-	CETNode(glm::vec4 v1,glm::vec4 v2) {
+	CETNode(glm::vec4 v1, glm::vec4 v2) {
 		x = static_cast<int>(v2.x);
 		z = v2.z;
 		dy = static_cast<int>(v2.y) - static_cast<int>(v1.y);
@@ -27,6 +27,7 @@ struct CPTNode {
 	float a, b, c, d;
 	int id, dy;
 	std::shared_ptr<std::vector<CETNode> > cetPtr{};
+	glm::vec3 color;
 };
 
 struct AETNode {

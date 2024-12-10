@@ -51,13 +51,14 @@ void ScanLineZBuffer::clear(glm::vec3 color) {
 }
 
 void ScanLineZBuffer::fragMeshToCPT(const FragMesh& fragMesh, const int id) const {
-	auto normal = fragMesh.calculateNormal();
-	//if (normal.z == 0.f) return;
+	auto v2dNormal = fragMesh.calculateV2dNormal();
+	auto v3dNormal = fragMesh.calculateV3dNormal();
+	//if (v2dNormal.z == 0.f) return;
 
 	auto v2d = fragMesh.v2d;
 	auto v3d = fragMesh.v3d;
 
-	// sort by y ascending 
+	// sort by y ascending
 	if (v2d[0].y > v2d[1].y)
 	{
 		std::swap(v2d[0], v2d[1]);
@@ -75,11 +76,13 @@ void ScanLineZBuffer::fragMeshToCPT(const FragMesh& fragMesh, const int id) cons
 	}
 
 	CPTNode cptNode;
-	cptNode.a = normal.x;
-	cptNode.b = normal.y;
-	cptNode.c = normal.z;
+	cptNode.a = v2dNormal.x;
+	cptNode.b = v2dNormal.y;
+	cptNode.c = v2dNormal.z;
 	cptNode.id = id;
-	cptNode.d = -glm::dot(normal, v3d[0]);
+	//cptNode.d = -glm::dot(normal, v3d[0]);
+	cptNode.d = -glm::dot(v2dNormal, glm::vec3(v2d[0]));
+	cptNode.color = v3dNormal;
 
 	int ymax = v2d[2].y;
 
@@ -89,7 +92,7 @@ void ScanLineZBuffer::fragMeshToCPT(const FragMesh& fragMesh, const int id) cons
 
 	cptNode.cetPtr = std::make_shared<std::vector<CETNode>>();
 	if (v2d[0].y != v2d[2].y)
-		cptNode.cetPtr->push_back(CETNode(v2d[0],v2d[2]));
+		cptNode.cetPtr->push_back(CETNode(v2d[0], v2d[2]));
 	if (v2d[1].y != v2d[2].y)
 		cptNode.cetPtr->push_back(CETNode(v2d[1], v2d[2]));
 	if (v2d[0].y != v2d[1].y)
@@ -98,7 +101,6 @@ void ScanLineZBuffer::fragMeshToCPT(const FragMesh& fragMesh, const int id) cons
 }
 
 void ScanLineZBuffer::checkCPT(int y) const {
-
 	for (int i = 0; i < cptPtr->at(y).size(); i++)
 	{
 		const CPTNode& cptNode = cptPtr->at(y)[i];
@@ -171,7 +173,7 @@ void ScanLineZBuffer::updateAET() {
 
 			aetNode.xl += aetNode.dxl;
 			aetNode.xr += aetNode.dxr;
-			aetNode.zl -= aetNode.dzy + aetNode.dzx * aetNode.dxl;
+			aetNode.zl += aetNode.dzy + aetNode.dzx * aetNode.dxl;
 		}
 	}
 }
@@ -182,4 +184,3 @@ void ScanLineZBuffer::bufferResize(size_t w, size_t h, glm::vec3 color) {
 	depthPtr->resize(w);
 	pixelPtr->resize(w * h, toU8Vec3(color));
 }
-
