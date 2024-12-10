@@ -40,28 +40,20 @@ void Render::regularRender(const Uniforms& uniforms,
 			// vertex shader
 			for (const auto& index : tri.indices) {
 				auto vertex = vertices[index];
-				//localFragMesh.v2d[vertexIndex++] = shader.getVertexShader()(vertex, uniforms);
 				localFragMesh.v2d[vertexIndex] = screenVertices[index];
 				localFragMesh.v3d[vertexIndex] = vertex.pos;
 				vertexIndex++;
 			}
+			shader.getFragmentShader()(localFragMesh, uniforms);
 
-			// raster and shader
-			regularRaster(localFragMesh, shader, uniforms);
-		}
-	}
-}
-
-void Render::regularRaster(const FragMesh& fragMesh,
-	const Shader& shader,
-	const Uniforms& uniforms) const {
-	const int width = static_cast<int>(bufferPtr->getWidth());
-	const int height = static_cast<int>(bufferPtr->getHeight());
-	BBOX bbox({ 0, 0, width, height });
-	bbox.updateBBox(fragMesh);
-	for (int x = bbox.getMinX(); x < bbox.getMaxX(); x++) {
-		for (int y = bbox.getMinY(); y < bbox.getMaxY(); y++) {
-			renderPixel({ x, y }, fragMesh, shader, uniforms);
+			BBOX bbox({ 0, 0, static_cast<int>(bufferPtr->getWidth()),
+				static_cast<int>(bufferPtr->getHeight()) });
+			bbox.updateBBox(localFragMesh);
+			for (int x = bbox.getMinX(); x < bbox.getMaxX(); x++) {
+				for (int y = bbox.getMinY(); y < bbox.getMaxY(); y++) {
+					renderPixel({ x, y }, localFragMesh, shader, uniforms);
+				}
+			}
 		}
 	}
 }
@@ -90,6 +82,9 @@ void Render::scanLineRender(const Shader& shader,
 			fragMesh.v2d[vertexIndex] = screenVertices[index];
 			vertexIndex++;
 		}
+
+		shader.getFragmentShader()(fragMesh, uniforms);
+
 		// construct CPTNOde
 		scanLineBufferPtr->fragMeshToCPT(fragMesh, i);
 	}
@@ -105,6 +100,7 @@ void Render::scanLineRender(const Shader& shader,
 		for (int i = 0; i < scanLineBufferPtr->getAETPtr()->size(); i++)
 		{
 			auto& aetNode = scanLineBufferPtr->getAETPtr()->at(i);
+			auto color = aetNode.cptNodePtr->color;
 			float z = aetNode.zl;
 
 			int beginX = aetNode.xl < 0 ? 0 : aetNode.xl;
@@ -114,10 +110,6 @@ void Render::scanLineRender(const Shader& shader,
 			// 增量式深度更新
 			for (int x = beginX; x <= endX; x++)
 			{
-				//glm::vec3 color = shader.getFragmentShader()(glm::vec4(x, y, 0.f, 1.f), uniforms);
-				auto color = aetNode.cptNodePtr->color;
-				color = (color + 1.f) / 2.f;
-				//auto color = glm::vec3(1.f);
 				if (z < scanLineBufferPtr->getDepth(x))
 				{
 					scanLineBufferPtr->setPixel(x, y, color);
@@ -154,10 +146,7 @@ void Render::renderPixel(glm::ivec2 pixel,
 		return;
 	}
 	// fragment shader
-	//const glm::vec3 color = shader.getFragmentShader()(glm::vec4(x, y, 0.f, 1.f), uniforms);
-	auto color = fragMesh.calculateV3dNormal();
-	color = (color + 1.f) / 2.f;
-	regularbufferPtr->setPixel(x, y, color);
+	regularbufferPtr->setPixel(x, y, fragMesh.color);
 	regularbufferPtr->setDepth(x, y, depth);
 }
 

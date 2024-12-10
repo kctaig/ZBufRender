@@ -27,6 +27,7 @@ void vertexShader(std::vector<glm::vec4>& vertices, const Uniforms& uniforms) {
 	}
 }
 
-glm::vec3 fragmentShader(const glm::vec4& fragPos, const Uniforms& uniforms) {
-	return { 1, 1, 1 };
+void fragmentShader(FragMesh& fragMesh, const Uniforms& uniforms) {
+	auto normal = fragMesh.calculateV3dNormal();
+	fragMesh.color = (normal + 1.f) / 2.f;
 }

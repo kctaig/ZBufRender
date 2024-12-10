@@ -12,6 +12,8 @@ struct FragMesh {
 	std::vector<glm::vec3> v3d;
 	size_t vertexNum;
 
+	glm::vec3 color = { 1.f,1.f,1.f };
+
 	glm::vec3 calculateV2dNormal() const {
 		//return normalize(glm::cross(v3d[1] - v3d[0], v3d[2] - v3d[0]));
 		return normalize(glm::cross(glm::vec3(v2d[1]) - glm::vec3(v2d[0]), glm::vec3(v2d[2]) - glm::vec3(v2d[0])));
@@ -60,7 +62,7 @@ public:
 	~Shader() = default;
 
 	using vertexShader = void(*)(std::vector<glm::vec4>&, const Uniforms&);
-	using fragmentShader = glm::vec3(*)(const glm::vec4&, const Uniforms&);
+	using fragmentShader = void(*)(FragMesh&, const Uniforms&);
 
 	Shader(const vertexShader& vs, const fragmentShader& fs)
 		: vs(vs), fs(fs) {
@@ -74,7 +76,6 @@ private:
 	fragmentShader fs;
 };
 
-//glm::vec4 vertexShader(Vertex& vertex, const Uniforms& uniforms);
 void vertexShader(std::vector<glm::vec4>& vertices, const Uniforms& uniforms);
 
-glm::vec3 fragmentShader(const glm::vec4& fragPos, const Uniforms& uniforms);
+void fragmentShader(FragMesh& fragMesh, const Uniforms& uniforms);

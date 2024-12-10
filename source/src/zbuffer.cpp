@@ -50,7 +50,8 @@ void ScanLineZBuffer::clear(glm::vec3 color) {
 	pixelPtr->assign(width * height, toU8Vec3(color));
 }
 
-void ScanLineZBuffer::fragMeshToCPT(const FragMesh& fragMesh, const int id) const {
+void ScanLineZBuffer::fragMeshToCPT(const FragMesh& fragMesh,
+	const int id) const {
 	auto v2dNormal = fragMesh.calculateV2dNormal();
 	auto v3dNormal = fragMesh.calculateV3dNormal();
 	//if (v2dNormal.z == 0.f) return;
@@ -82,7 +83,7 @@ void ScanLineZBuffer::fragMeshToCPT(const FragMesh& fragMesh, const int id) cons
 	cptNode.id = id;
 	//cptNode.d = -glm::dot(normal, v3d[0]);
 	cptNode.d = -glm::dot(v2dNormal, glm::vec3(v2d[0]));
-	cptNode.color = v3dNormal;
+	cptNode.color = fragMesh.color;
 
 	int ymax = v2d[2].y;
 
@@ -145,7 +146,7 @@ void ScanLineZBuffer::checkCPT(int y) const {
 }
 
 void ScanLineZBuffer::updateAET() {
-	for (int i = 0; i < aetPtr->size();)
+	for (int i = 0; i < aetPtr->size(); i++)
 	{
 		auto& aetNode = aetPtr->at(i);
 		aetNode.dyl--;
@@ -153,6 +154,7 @@ void ScanLineZBuffer::updateAET() {
 		if (aetNode.dyl < 0 && aetNode.dyr < 0)
 		{
 			aetPtr->erase(aetPtr->begin() + i);
+			i--;
 		}
 		else
 		{
@@ -174,7 +176,6 @@ void ScanLineZBuffer::updateAET() {
 			aetNode.xl += aetNode.dxl;
 			aetNode.xr += aetNode.dxr;
 			aetNode.zl += aetNode.dzy + aetNode.dzx * aetNode.dxl;
-			i++;
 		}
 	}
 }

@@ -23,10 +23,6 @@ public:
 		const Shader& shader,
 		bool useParallel = true) const;
 
-	void regularRaster(const FragMesh& fragMesh,
-		const Shader& shader,
-		const Uniforms& uniforms) const;
-
 	void scanLineRender(const Shader& shader,
 		const Uniforms& uniforms) const;
 
