@@ -145,7 +145,7 @@ void ScanLineZBuffer::checkCPT(int y) const {
 }
 
 void ScanLineZBuffer::updateAET() {
-	for (int i = 0; i < aetPtr->size(); i++)
+	for (int i = 0; i < aetPtr->size();)
 	{
 		auto& aetNode = aetPtr->at(i);
 		aetNode.dyl--;
@@ -174,6 +174,7 @@ void ScanLineZBuffer::updateAET() {
 			aetNode.xl += aetNode.dxl;
 			aetNode.xr += aetNode.dxr;
 			aetNode.zl += aetNode.dzy + aetNode.dzx * aetNode.dxl;
+			i++;
 		}
 	}
 }
