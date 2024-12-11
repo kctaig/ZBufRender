@@ -185,4 +185,5 @@ void ScanLineZBuffer::bufferResize(size_t w, size_t h, glm::vec3 color) {
 	height = h;
 	depthPtr->resize(w);
 	pixelPtr->resize(w * h, toU8Vec3(color));
+	cptPtr->resize(h);
 }
