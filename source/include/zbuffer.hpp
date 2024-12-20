@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <memory>
 
+#include "quad_tree.hpp"
 #include "scanline_struct.hpp"
 
 class ZBuffer {
@@ -79,4 +80,22 @@ public:
 private:
 	std::unique_ptr<std::vector<std::vector<CPTNode> > > cptPtr{}; // 分类多边形表指针
 	std::unique_ptr<std::vector<AETNode> > aetPtr{};
+};
+
+class NaiveHierarchyZBuffer : public ZBuffer {
+   public:
+    NaiveHierarchyZBuffer() = default;
+
+    NaiveHierarchyZBuffer(size_t width, size_t height);
+
+    void clear(glm::vec3 color) override;
+
+    void bufferResize(size_t w, size_t h, glm::vec3 color) override;
+
+    void createQuadTree(BBOX& bbox);
+
+    auto& getRoot() { return root; }
+
+   private:
+    std::shared_ptr<QuadTree> root;
 };

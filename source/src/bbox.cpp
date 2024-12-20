@@ -19,3 +19,12 @@ void BBOX::updateBBox(const FragMesh& fragMesh) {
 	maxX = std::min(maxX, maxx);
 	maxY = std::min(maxY, maxy);
 }
+
+bool BBOX::containFragMesh(const FragMesh& fragMesh) const {
+    float meshMinX = std::min(fragMesh.v2d[0].x, std::min(fragMesh.v2d[1].x, fragMesh.v2d[2].x));
+    float meshMinY = std::min(fragMesh.v2d[0].y, std::min(fragMesh.v2d[1].y, fragMesh.v2d[2].y));
+    float meshMaxX = std::max(fragMesh.v2d[0].x, std::max(fragMesh.v2d[1].x, fragMesh.v2d[2].x));
+    float meshMaxY = std::max(fragMesh.v2d[0].y, std::max(fragMesh.v2d[1].y, fragMesh.v2d[2].y));
+
+    return meshMinX >= minX && meshMinY >= minY && meshMaxX <= maxX && meshMaxY <= maxY;
+}
