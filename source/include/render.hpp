@@ -6,6 +6,7 @@
 #include "zbuffer.hpp"
 #include "model.hpp"
 #include "quad_tree.hpp"
+#include "shader.hpp"
 
 enum RasterType {
 	REGULAR,
@@ -36,16 +37,8 @@ public:
 		const Uniforms& uniforms) const;
 
 	void naiveHierarchyRender(const Shader& shader,
-		const Uniforms& uniforms) const;
-
-	//static glm::vec3 calculateWeights(
-	//    const FragMesh& fragMesh,
-	//    const glm::vec2& screenPoint);
-
-	//float calculateDepth(glm::ivec2 pixel,
-	//                     const FragMesh& fragMesh) const;
-
-	//static constexpr float EPSILON = std::numeric_limits<float>::epsilon();
+		const Uniforms& uniforms,
+		bool useParallel = true) const;
 
 	auto getCameraPtr() const { return cameraPtr; }
 	auto getBufferPtr() const { return bufferPtr; }

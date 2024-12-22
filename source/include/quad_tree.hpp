@@ -5,6 +5,7 @@
 
 #include "bbox.hpp"
 #include "zbuffer.hpp"
+#include "shader.hpp"
 
 class QuadTree {
 public:

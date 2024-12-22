@@ -11,12 +11,12 @@ struct FragMesh {
 	glm::vec3 color = { 1.f, 1.f, 1.f };
 
 	void init3dBbox() {
-		xmin = std::min(v3d[0].x, std::min(v3d[1].x, v3d[2].x));
-		xmax = std::max(v3d[0].x, std::max(v3d[1].x, v3d[2].x));
-		ymin = std::min(v3d[0].y, std::min(v3d[1].y, v3d[2].y));
-		ymax = std::max(v3d[0].y, std::max(v3d[1].y, v3d[2].y));
-		zmin = std::min(v3d[0].z, std::min(v3d[1].z, v3d[2].z));
-		zmax = std::max(v3d[0].z, std::max(v3d[1].z, v3d[2].z));
+		xmin = std::min(v2d[0].x, std::min(v2d[1].x, v2d[2].x));
+		xmax = std::max(v2d[0].x, std::max(v2d[1].x, v2d[2].x));
+		ymin = std::min(v2d[0].y, std::min(v2d[1].y, v2d[2].y));
+		ymax = std::max(v2d[0].y, std::max(v2d[1].y, v2d[2].y));
+		zmin = std::min(v2d[0].z, std::min(v2d[1].z, v2d[2].z));
+		zmax = std::max(v2d[0].z, std::max(v2d[1].z, v2d[2].z));
 	}
 
 	glm::vec3 calculateV2dNormal() const {

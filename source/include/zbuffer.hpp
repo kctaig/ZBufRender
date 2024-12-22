@@ -4,6 +4,8 @@
 #include <memory>
 
 #include "scanline_struct.hpp"
+#include "frag_mesh.hpp"
+#include "Uniforms.hpp"
 
 class ZBuffer {
 public:
@@ -90,8 +92,6 @@ public:
 	void clear(glm::vec3 color) override;
 
 	void bufferResize(size_t w, size_t h, glm::vec3 color) override;
-
-	//void createQuadTree(BBOX& bbox);
 
 private:
 };

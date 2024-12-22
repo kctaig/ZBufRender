@@ -1,7 +1,7 @@
 #include "quad_tree.hpp"
 
 QuadTree::QuadTree(BBOX& bbox) {
-	depth = 1.f;
+	depth = 2.f;
 	bboxPtr = std::make_shared<BBOX>(bbox);
 
 	int minX = bbox.getMinX();
@@ -32,7 +32,7 @@ QuadTree::QuadTree(BBOX& bbox) {
 }
 
 void QuadTree::resetDepth(float d) {
-	depth = 1.f;
+	depth = d;
 	for (auto& child : children) {
 		child->resetDepth(d);
 	}
@@ -54,14 +54,14 @@ bool QuadTree::containFragMesh(const FragMesh& fragMesh) const {
 
 bool QuadTree::containPixel(glm::ivec2 pixel) const {
 	return pixel.x >= bboxPtr->getMinX()
-		&& pixel.x <= bboxPtr->getMaxX()
+		&& pixel.x < bboxPtr->getMaxX()
 		&& pixel.y >= bboxPtr->getMinY()
-		&& pixel.y <= bboxPtr->getMaxY();
+		&& pixel.y < bboxPtr->getMaxY();
 }
 
 void QuadTree::checkPixel(glm::ivec2 pixel, float pixelDepth, glm::vec3 color, std::shared_ptr<ZBuffer>bufferPtr) {
 	// 该像素已被消隐，无需被绘制
-	if (pixelDepth > depth) return;
+	if (pixelDepth >= depth) return;
 
 	bool flag = false;
 	for (auto& child : children) {
@@ -75,11 +75,9 @@ void QuadTree::checkPixel(glm::ivec2 pixel, float pixelDepth, glm::vec3 color, s
 
 	// 当前节点是包含pixel的最低节点
 	if (!flag) {
-		if (pixelDepth < depth) {
-			depth = pixelDepth;
-			bufferPtr->setDepth(pixel.x, pixel.y, pixelDepth);
-			bufferPtr->setPixel(pixel.x, pixel.y, color);
-		}
+		depth = pixelDepth;
+		bufferPtr->setDepth(pixel.x, pixel.y, pixelDepth);
+		bufferPtr->setPixel(pixel.x, pixel.y, color);
 	}
 }
 
@@ -106,7 +104,7 @@ void QuadTree::checkFragMesh(const FragMesh& fragMesh, const Shader& shader, std
 			for (int y = bboxPtr->getMinY(); y < bboxPtr->getMaxY(); y++) {
 				// 获取fragMesh中当前像素的深度值
 				auto pixelDepth = shader.calculateDepth({ x, y }, fragMesh);
-				if (pixelDepth <= 1.f && pixelDepth >= 0.f)
+				if (pixelDepth < bufferPtr->getDepth(x, y) && pixelDepth > 0.f)
 					checkPixel({ x,y }, pixelDepth, fragMesh.color, bufferPtr);
 			}
 		}

@@ -1,13 +1,7 @@
-//
-// Created by lyx on 2024/11/29.
-//
-
 #pragma once
 
 #include <iostream>
 #include <vector>
-
-#include "shader.hpp"
 
 struct CETNode {
 	int x, dy;

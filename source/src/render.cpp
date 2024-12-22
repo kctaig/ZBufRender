@@ -119,7 +119,8 @@ void Render::scanLineRender(const Shader& shader,
 }
 
 void Render::naiveHierarchyRender(const Shader& shader,
-	const Uniforms& uniforms) const {
+	const Uniforms& uniforms,
+	bool useParallel) const {
 	auto naiveHierarchyBufferPtr = std::dynamic_pointer_cast<NaiveHierarchyZBuffer>(bufferPtr);
 	const auto& vertices = modelPtr->getVertices();
 	const auto& triangles = modelPtr->getTriangles();
@@ -133,23 +134,31 @@ void Render::naiveHierarchyRender(const Shader& shader,
 	// 建立四叉树
 	std::shared_ptr<QuadTree> root = std::make_shared<QuadTree>(BBOX{ 0,0,
 		static_cast<int>(bufferPtr->getWidth()),
-		static_cast<int>(bufferPtr->getHeight()) });
+		static_cast<int>(bufferPtr->getHeight())
+		});
 
-	// 建立 fragMesh
-	FragMesh fragMesh{ std::vector<glm::vec4>(3), std::vector<glm::vec3>(3), 3 };
-	for (int i = 0; i < triangles.size(); ++i) {
-		const auto& tri = triangles[i];
-		size_t vertexIndex = 0;
-		for (const auto& index : tri.indices) {
-			fragMesh.v3d[vertexIndex] = vertices[index].pos;
-			fragMesh.v2d[vertexIndex] = screenVertices[index];
-			vertexIndex++;
+	const int maxThreads = useParallel ? omp_get_max_threads() : 1;
+	std::vector<FragMesh> fragMeshes(maxThreads, FragMesh{
+													 std::vector<glm::vec4>(3),
+													 std::vector<glm::vec3>(3), 3 });
+
+#pragma omp parallel if (useParallel)
+	{
+		const int threadId = omp_get_thread_num();
+		FragMesh& localFragMesh = fragMeshes[threadId];
+
+#pragma omp for nowait
+		for (int i = 0; i < triangles.size(); ++i) {
+			const auto& tri = triangles[i];
+			size_t vertexIndex = 0;
+			for (const auto& index : tri.indices) {
+				localFragMesh.v3d[vertexIndex] = vertices[index].pos;
+				localFragMesh.v2d[vertexIndex] = screenVertices[index];
+				vertexIndex++;
+			}
+			shader.getFragmentShader()(localFragMesh, uniforms);
+			localFragMesh.init3dBbox();
+			root->checkFragMesh(localFragMesh, shader, bufferPtr);
 		}
-		shader.getFragmentShader()(fragMesh, uniforms);
-
-		fragMesh.zmin = std::min(fragMesh.v2d[0].z,
-			std::min(fragMesh.v2d[1].z, fragMesh.v2d[2].z));
-
-		root->checkFragMesh(fragMesh, shader, bufferPtr);
 	}
 }
