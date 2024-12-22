@@ -1,9 +1,4 @@
-#include <omp.h>
-//#include <algorithm>
-#include <iostream>
-
 #include "render.hpp"
-#include "quad_tree.hpp"
 
 void Render::regularRender(const Uniforms& uniforms,
 	const Shader& shader,

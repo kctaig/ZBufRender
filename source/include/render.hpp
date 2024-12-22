@@ -1,7 +1,11 @@
 #pragma once
 
+#include <omp.h>
+#include <iostream>
+
 #include "zbuffer.hpp"
 #include "model.hpp"
+#include "quad_tree.hpp"
 
 enum RasterType {
 	REGULAR,

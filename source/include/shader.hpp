@@ -1,5 +1,8 @@
 #pragma once
 
+#include <iostream>
+#include <algorithm>
+
 #include "frag_mesh.hpp"
 #include "uniforms.hpp"
 

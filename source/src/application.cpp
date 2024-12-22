@@ -1,6 +1,3 @@
-#include <chrono>
-#include <glm/gtc/matrix_transform.hpp>
-
 #include "application.hpp"
 
 void Application::run() const {

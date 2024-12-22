@@ -1,6 +1,4 @@
 #include "shader.hpp"
-#include <iostream>
-#include <algorithm>
 
 // todo: return type to FragMesh
 void vertexShader(std::vector<glm::vec4>& vertices, const Uniforms& uniforms) {
@@ -31,7 +29,7 @@ void vertexShader(std::vector<glm::vec4>& vertices, const Uniforms& uniforms) {
 void fragmentShader(FragMesh& fragMesh, const Uniforms& uniforms) {
 	auto normal = fragMesh.calculateV3dNormal();
 	fragMesh.color = (normal + 1.f) / 2.f;
-        // fragMesh.color = glm::vec3(1.f, 1.f, 1.f);
+	// fragMesh.color = glm::vec3(1.f, 1.f, 1.f);
 }
 
 float Shader::calculateDepth(glm::ivec2 pixel,
@@ -54,7 +52,7 @@ float Shader::calculateDepth(glm::ivec2 pixel,
 }
 
 glm::vec3 Shader::calculateWeights(const FragMesh& fragMesh,
-	 const glm::vec2& screenPoint) const {
+	const glm::vec2& screenPoint) const {
 	glm::vec3 weights(0.f), screenWeights(0.f);
 	const glm::vec4 fragCoords[3] = {
 		fragMesh.v2d[0],

@@ -82,16 +82,16 @@ private:
 };
 
 class NaiveHierarchyZBuffer : public ZBuffer {
-   public:
-    NaiveHierarchyZBuffer() = default;
+public:
+	NaiveHierarchyZBuffer() = default;
 
-    NaiveHierarchyZBuffer(size_t width, size_t height);
+	NaiveHierarchyZBuffer(size_t width, size_t height);
 
-    void clear(glm::vec3 color) override;
+	void clear(glm::vec3 color) override;
 
-    void bufferResize(size_t w, size_t h, glm::vec3 color) override;
+	void bufferResize(size_t w, size_t h, glm::vec3 color) override;
 
-    //void createQuadTree(BBOX& bbox);
+	//void createQuadTree(BBOX& bbox);
 
-   private:
+private:
 };
