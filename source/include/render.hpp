@@ -31,14 +31,14 @@ class Render {
     void naiveHierarchyRender(const Shader& shader,
                               const Uniforms& uniforms) const;
 
-    static glm::vec3 calculateWeights(
-        const FragMesh& fragMesh,
-        const glm::vec2& screenPoint);
+    //static glm::vec3 calculateWeights(
+    //    const FragMesh& fragMesh,
+    //    const glm::vec2& screenPoint);
 
-    float calculateDepth(glm::ivec2 pixel,
-                         const FragMesh& fragMesh) const;
+    //float calculateDepth(glm::ivec2 pixel,
+    //                     const FragMesh& fragMesh) const;
 
-    static constexpr float EPSILON = std::numeric_limits<float>::epsilon();
+    //static constexpr float EPSILON = std::numeric_limits<float>::epsilon();
 
     auto getCameraPtr() const { return cameraPtr; }
     auto getBufferPtr() const { return bufferPtr; }

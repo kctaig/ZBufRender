@@ -70,6 +70,14 @@ class Shader {
     vertexShader getVertexShader() const { return vs; }
     fragmentShader getFragmentShader() const { return fs; }
 
+    float calculateDepth(glm::ivec2 pixel,
+        const FragMesh& fragMesh) const;
+
+    glm::vec3 calculateWeights(const FragMesh& fragMesh,
+         const glm::vec2& screenPoint)const ;
+
+    static constexpr float EPSILON = std::numeric_limits<float>::epsilon();
+
    private:
     vertexShader vs;
     fragmentShader fs;

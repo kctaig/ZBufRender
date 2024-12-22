@@ -188,7 +188,6 @@ NaiveHierarchyZBuffer::NaiveHierarchyZBuffer(size_t width, size_t height)
 void NaiveHierarchyZBuffer::clear(glm::vec3 color) {
     depthPtr->assign(width * height, 1.f);
     pixelPtr->assign(width * height, toU8Vec3(color));
-    root->resetDepth(1.f);
 }
 
 void NaiveHierarchyZBuffer::bufferResize(size_t w, size_t h, glm::vec3 color) {
@@ -196,9 +195,4 @@ void NaiveHierarchyZBuffer::bufferResize(size_t w, size_t h, glm::vec3 color) {
     height = h;
     depthPtr->resize(w * h, 1.f);
     pixelPtr->resize(w * h, toU8Vec3(color));
-    root = std::make_shared<QuadTree>(BBOX(0, 0, w, h));
-}
-
-void NaiveHierarchyZBuffer::createQuadTree(BBOX& bbox) {
-    root = std::make_shared<QuadTree>(bbox);
 }
