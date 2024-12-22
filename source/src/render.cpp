@@ -2,8 +2,6 @@
 //#include <algorithm>
 #include <iostream>
 
-#include "bbox.hpp"
-#include "model.hpp"
 #include "render.hpp"
 #include "quad_tree.hpp"
 

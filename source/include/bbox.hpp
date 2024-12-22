@@ -1,29 +1,29 @@
 #pragma once
 
-#include "shader.hpp"
+#include "frag_mesh.hpp"
 
 class BBOX {
-   public:
-    BBOX() = default;
+public:
+	BBOX() = default;
 
-    ~BBOX() = default;
+	~BBOX() = default;
 
-    BBOX(int minX, int minY, int maxX, int maxY)
-        : minX(minX), minY(minY), maxX(maxX), maxY(maxY) {
-    }
+	BBOX(int minX, int minY, int maxX, int maxY)
+		: minX(minX), minY(minY), maxX(maxX), maxY(maxY) {
+	}
 
-    void updateBBox(const FragMesh& fragMesh);
+	void updateBBox(const FragMesh& fragMesh);
 
-    int getMinX() const { return minX; }
-    int getMinY() const { return minY; }
-    int getMaxX() const { return maxX; }
-    int getMaxY() const { return maxY; }
+	int getMinX() const { return minX; }
+	int getMinY() const { return minY; }
+	int getMaxX() const { return maxX; }
+	int getMaxY() const { return maxY; }
 
-    bool containFragMesh(const FragMesh& fragMesh) const;
+	bool containFragMesh(const FragMesh& fragMesh) const;
 
-   private:
-    int minX,
-        minY,
-        maxX,
-        maxY;
+private:
+	int minX,
+		minY,
+		maxX,
+		maxY;
 };

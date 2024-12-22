@@ -1,53 +1,56 @@
 #pragma once
 
 #include "zbuffer.hpp"
+#include "model.hpp"
 
-enum RasterType { REGULAR,
-                  SCANLINE,
-                  NAIVE };
+enum RasterType {
+	REGULAR,
+	SCANLINE,
+	NAIVE
+};
 
 class Render {
-   public:
-    Render() = default;
+public:
+	Render() = default;
 
-    ~Render() = default;
-    Render(std::unique_ptr<Model> mPtr,
-           std::shared_ptr<Camera> cPtr,
-           std::shared_ptr<ZBuffer> fbPtr,
-           RasterType type) {
-        modelPtr = std::move(mPtr);
-        cameraPtr = cPtr;
-        bufferPtr = fbPtr;
-        rasterType = type;
-    }
+	~Render() = default;
+	Render(std::unique_ptr<Model> mPtr,
+		std::shared_ptr<Camera> cPtr,
+		std::shared_ptr<ZBuffer> fbPtr,
+		RasterType type) {
+		modelPtr = std::move(mPtr);
+		cameraPtr = cPtr;
+		bufferPtr = fbPtr;
+		rasterType = type;
+	}
 
-    void regularRender(const Uniforms& uniforms,
-                       const Shader& shader,
-                       bool useParallel = true) const;
+	void regularRender(const Uniforms& uniforms,
+		const Shader& shader,
+		bool useParallel = true) const;
 
-    void scanLineRender(const Shader& shader,
-                        const Uniforms& uniforms) const;
+	void scanLineRender(const Shader& shader,
+		const Uniforms& uniforms) const;
 
-    void naiveHierarchyRender(const Shader& shader,
-                              const Uniforms& uniforms) const;
+	void naiveHierarchyRender(const Shader& shader,
+		const Uniforms& uniforms) const;
 
-    //static glm::vec3 calculateWeights(
-    //    const FragMesh& fragMesh,
-    //    const glm::vec2& screenPoint);
+	//static glm::vec3 calculateWeights(
+	//    const FragMesh& fragMesh,
+	//    const glm::vec2& screenPoint);
 
-    //float calculateDepth(glm::ivec2 pixel,
-    //                     const FragMesh& fragMesh) const;
+	//float calculateDepth(glm::ivec2 pixel,
+	//                     const FragMesh& fragMesh) const;
 
-    //static constexpr float EPSILON = std::numeric_limits<float>::epsilon();
+	//static constexpr float EPSILON = std::numeric_limits<float>::epsilon();
 
-    auto getCameraPtr() const { return cameraPtr; }
-    auto getBufferPtr() const { return bufferPtr; }
-    auto getModelPtr() const { return modelPtr.get(); }
-    auto getRasterType() const { return rasterType; }
+	auto getCameraPtr() const { return cameraPtr; }
+	auto getBufferPtr() const { return bufferPtr; }
+	auto getModelPtr() const { return modelPtr.get(); }
+	auto getRasterType() const { return rasterType; }
 
-   private:
-    std::unique_ptr<Model> modelPtr;
-    std::shared_ptr<Camera> cameraPtr;
-    std::shared_ptr<ZBuffer> bufferPtr;
-    RasterType rasterType;
+private:
+	std::unique_ptr<Model> modelPtr;
+	std::shared_ptr<Camera> cameraPtr;
+	std::shared_ptr<ZBuffer> bufferPtr;
+	RasterType rasterType;
 };
