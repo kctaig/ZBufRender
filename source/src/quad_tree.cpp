@@ -1,7 +1,7 @@
 #include "quad_tree.hpp"
 
 QuadTree::QuadTree(BBOX& bbox) {
-	depth = 2.f;
+	depth = FLT_MAX;
 	bboxPtr = std::make_shared<BBOX>(bbox);
 
 	int minX = bbox.getMinX();
@@ -41,7 +41,7 @@ void QuadTree::resetDepth(float d) {
 void QuadTree::updateDepth() {
 	if (children.empty()) return;
 
-	float tempDepth = 0.f;
+	float tempDepth = FLT_MIN;
 	for (auto& child : children) {
 		tempDepth = std::max(tempDepth, child->getDepth());
 	}
@@ -63,20 +63,20 @@ void QuadTree::checkPixel(glm::ivec2 pixel, float pixelDepth, glm::vec3 color, s
 	// 该像素已被消隐，无需被绘制
 	if (pixelDepth >= depth) return;
 
-	bool flag = false;
+	bool containP = false;
 	for (auto& child : children) {
 		if (child->containPixel(pixel)) {
 			child->checkPixel(pixel, pixelDepth, color, bufferPtr);
-			flag = true;
+			containP = true;
 			updateDepth();
 			break;
 		}
 	}
 
 	// 当前节点是包含pixel的最低节点
-	if (!flag) {
+	if (!containP) {
 		depth = pixelDepth;
-		bufferPtr->setDepth(pixel.x, pixel.y, pixelDepth);
+		//bufferPtr->setDepth(pixel.x, pixel.y, pixelDepth);
 		bufferPtr->setPixel(pixel.x, pixel.y, color);
 	}
 }
@@ -87,18 +87,18 @@ void QuadTree::checkFragMesh(const FragMesh& fragMesh, const Shader& shader, std
 		return;
 
 	// 判断子节点是否包含fragMesh
-	bool flag = false;
+	bool containFM = false;
 	for (auto& child : children) {
 		if (child->containFragMesh(fragMesh)) {
 			child->checkFragMesh(fragMesh, shader, bufferPtr);
-			flag = true;
+			containFM = true;
 			// 更新当前节点的深度
 			updateDepth();
 			break;
 		}
 	}
 	// 当前节点是包含fragMesh的最低节点
-	if (!flag) {
+	if (!containFM) {
 		// 绘制fragMesh，更新深度
 		for (int x = fragMesh.xmin; x < fragMesh.xmax; x++) {
 			for (int y = fragMesh.ymin; y < fragMesh.ymax; y++) {

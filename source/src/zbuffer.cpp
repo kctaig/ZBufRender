@@ -182,18 +182,18 @@ void ScanLineZBuffer::bufferResize(size_t w, size_t h, glm::vec3 color) {
 
 NaiveHierarchyZBuffer::NaiveHierarchyZBuffer(size_t width, size_t height)
 	: ZBuffer(width, height) {
-	depthPtr = std::make_unique<std::vector<float>>(width * height, 1.f);
+	//depthPtr = std::make_unique<std::vector<float>>(width * height, 1.f);
 	pixelPtr = std::make_unique<std::vector<glm::u8vec3>>(width * height, glm::u8vec3(0));
 }
 
 void NaiveHierarchyZBuffer::clear(glm::vec3 color) {
-	depthPtr->assign(width * height, 1.f);
+	//depthPtr->assign(width * height, 1.f);
 	pixelPtr->assign(width * height, toU8Vec3(color));
 }
 
 void NaiveHierarchyZBuffer::bufferResize(size_t w, size_t h, glm::vec3 color) {
 	width = w;
 	height = h;
-	depthPtr->resize(w * h, 1.f);
+	//depthPtr->resize(w * h, 1.f);
 	pixelPtr->resize(w * h, toU8Vec3(color));
 }
