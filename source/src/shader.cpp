@@ -1,6 +1,5 @@
 #include "shader.hpp"
 
-// todo: return type to FragMesh
 void vertexShader(std::vector<glm::vec4>& vertices, const Uniforms& uniforms) {
 	for (auto& vertex : vertices) {
 		auto clipPos = uniforms.projection * uniforms.view * uniforms.model * vertex;
@@ -15,8 +14,12 @@ void vertexShader(std::vector<glm::vec4>& vertices, const Uniforms& uniforms) {
 		fragPos.x = (NDC.x + 1.f) * .5f * static_cast<float>(uniforms.screenWidth);
 		fragPos.y = (NDC.y + 1.f) * .5f * static_cast<float>(uniforms.screenHeight);
 
-		fragPos.x = static_cast<int>(fragPos.x + .5f);
-		fragPos.y = static_cast<int>(fragPos.y + .5f);
+		// 转成屏幕像素坐标
+		int screenX = static_cast<int>(fragPos.x + .5f);
+		int screenY = static_cast<int>(fragPos.y + .5f);
+
+		fragPos.x = static_cast<float>(screenX);
+		fragPos.y = static_cast<float>(screenY);
 
 		vertex = fragPos;
 	}
@@ -24,8 +27,8 @@ void vertexShader(std::vector<glm::vec4>& vertices, const Uniforms& uniforms) {
 
 void fragmentShader(FragMesh& fragMesh, const Uniforms& uniforms) {
 	auto normal = fragMesh.calculateV3dNormal();
-	fragMesh.color = (normal + 1.f) / 2.f;
-	//fragMesh.color = glm::vec3(1.f, 1.f, 1.f);
+	//fragMesh.color = (normal + 1.f) / 2.f;
+	fragMesh.color = glm::vec3(1.f, 1.f, 1.f);
 }
 
 float Shader::calculateDepth(glm::ivec2 pixel,
@@ -37,7 +40,7 @@ float Shader::calculateDepth(glm::ivec2 pixel,
 	// 检查重心坐标是否无效
 	if (std::any_of(&weights[0], &weights[0] + 3,
 		[](const float w) { return w < -EPSILON; })) {
-		return INT_MAX;
+		return FLT_MAX;
 	}
 	// calculate test
 	float depth = fragMesh.v2d[0].z * weights[0] +

@@ -30,11 +30,11 @@ void Application::run() const {
 
 		// render type
 		if (renderPtr->getRasterType() == REGULAR)
-			renderPtr->regularRender(*uniformsPtr, *shaderPtr, false);
+			renderPtr->regularRender(*uniformsPtr, *shaderPtr);
 		else if (renderPtr->getRasterType() == SCANLINE)
 			renderPtr->scanLineRender(*shaderPtr, *uniformsPtr);
 		else if (renderPtr->getRasterType() == NAIVE)
-			renderPtr->naiveHierarchyRender(*shaderPtr, *uniformsPtr, true);
+			renderPtr->naiveHierarchyRender(*shaderPtr, *uniformsPtr);
 
 		// 设置像素操作参数
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);

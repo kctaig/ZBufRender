@@ -30,15 +30,13 @@ public:
 	}
 
 	void regularRender(const Uniforms& uniforms,
-		const Shader& shader,
-		bool useParallel = false) const;
+		const Shader& shader) const;
 
 	void scanLineRender(const Shader& shader,
 		const Uniforms& uniforms) const;
 
 	void naiveHierarchyRender(const Shader& shader,
-		const Uniforms& uniforms,
-		bool useParallel = false) const;
+		const Uniforms& uniforms) const;
 
 	auto getCameraPtr() const { return cameraPtr; }
 	auto getBufferPtr() const { return bufferPtr; }

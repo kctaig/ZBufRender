@@ -104,8 +104,8 @@ void QuadTree::checkFragMesh(const FragMesh& fragMesh, const Shader& shader, std
 			for (int y = fragMesh.ymin; y < fragMesh.ymax; y++) {
 				// 获取fragMesh中当前像素的深度值
 				auto pixelDepth = shader.calculateDepth({ x, y }, fragMesh);
-				if (pixelDepth <= bufferPtr->getDepth(x, y))
-					checkPixel({ x,y }, pixelDepth, fragMesh.color, bufferPtr);
+				//if (pixelDepth <= bufferPtr->getDepth(x, y))
+				checkPixel({ x,y }, pixelDepth, fragMesh.color, bufferPtr);
 			}
 		}
 	}
