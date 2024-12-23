@@ -34,7 +34,7 @@ void Application::run() const {
 		else if (renderPtr->getRasterType() == SCANLINE)
 			renderPtr->scanLineRender(*shaderPtr, *uniformsPtr);
 		else if (renderPtr->getRasterType() == NAIVE)
-			renderPtr->naiveHierarchyRender(*shaderPtr, *uniformsPtr);
+			renderPtr->naiveHierarchyRender(*shaderPtr, *uniformsPtr, true);
 
 		// 设置像素操作参数
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -59,8 +59,8 @@ void Application::run() const {
 }
 
 void Application::init(size_t width, size_t height, RasterType rasterType) {
-	auto modelPtr = std::make_unique<Model>(R"(D:\code\ZBufRender\asserts)", "suzanne.obj");  // armadillo
-	auto cameraPtr = std::make_shared<Camera>(glm::vec3(0.0f, 0.f, 4.0f));
+	auto modelPtr = std::make_unique<Model>(R"(D:\code\ZBufRender\asserts)", "armadillo.obj");  // armadillo
+	auto cameraPtr = std::make_shared<Camera>(glm::vec3(0.0f, 0.f, 6.0f));
 	std::shared_ptr<ZBuffer> bufferPtr;
 	if (rasterType == REGULAR) {
 		bufferPtr = std::make_shared<RegularZBuffer>(width, height);

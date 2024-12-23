@@ -31,14 +31,14 @@ public:
 
 	void regularRender(const Uniforms& uniforms,
 		const Shader& shader,
-		bool useParallel = true) const;
+		bool useParallel = false) const;
 
 	void scanLineRender(const Shader& shader,
 		const Uniforms& uniforms) const;
 
 	void naiveHierarchyRender(const Shader& shader,
 		const Uniforms& uniforms,
-		bool useParallel = true) const;
+		bool useParallel = false) const;
 
 	auto getCameraPtr() const { return cameraPtr; }
 	auto getBufferPtr() const { return bufferPtr; }

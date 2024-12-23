@@ -14,7 +14,7 @@ void Render::regularRender(const Uniforms& uniforms,
 
 	// number of thread
 	const int maxThreads = useParallel ? omp_get_max_threads() : 1;
-	// std::cout << "maxThreads: " << maxThreads << std::endl;
+	//std::cout << "maxThreads: " << maxThreads << std::endl;
 
 	// assign FragMesh for thread
 	std::vector<FragMesh> fragMeshes(maxThreads, FragMesh{
@@ -142,6 +142,9 @@ void Render::naiveHierarchyRender(const Shader& shader,
 													 std::vector<glm::vec4>(3),
 													 std::vector<glm::vec3>(3), 3 });
 
+	BBOX screenBBox({ 0, 0, static_cast<int>(bufferPtr->getWidth()),
+					   static_cast<int>(bufferPtr->getHeight()) });
+
 #pragma omp parallel if (useParallel)
 	{
 		const int threadId = omp_get_thread_num();
@@ -158,6 +161,13 @@ void Render::naiveHierarchyRender(const Shader& shader,
 			}
 			shader.getFragmentShader()(localFragMesh, uniforms);
 			localFragMesh.init3dBbox();
+			// clip fragMesh
+			if (!screenBBox.containFragMesh(localFragMesh)) {
+				localFragMesh.xmin = std::max(static_cast<int>(localFragMesh.xmin), screenBBox.getMinX());
+				localFragMesh.ymin = std::max(static_cast<int>(localFragMesh.ymin), screenBBox.getMinY());
+				localFragMesh.xmax = std::min(static_cast<int>(localFragMesh.xmax), screenBBox.getMaxX());
+				localFragMesh.ymax = std::min(static_cast<int>(localFragMesh.ymax), screenBBox.getMaxY());
+			}
 			root->checkFragMesh(localFragMesh, shader, bufferPtr);
 		}
 	}

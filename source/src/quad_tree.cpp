@@ -100,11 +100,11 @@ void QuadTree::checkFragMesh(const FragMesh& fragMesh, const Shader& shader, std
 	// 当前节点是包含fragMesh的最低节点
 	if (!flag) {
 		// 绘制fragMesh，更新深度
-		for (int x = bboxPtr->getMinX(); x < bboxPtr->getMaxX(); x++) {
-			for (int y = bboxPtr->getMinY(); y < bboxPtr->getMaxY(); y++) {
+		for (int x = fragMesh.xmin; x < fragMesh.xmax; x++) {
+			for (int y = fragMesh.ymin; y < fragMesh.ymax; y++) {
 				// 获取fragMesh中当前像素的深度值
 				auto pixelDepth = shader.calculateDepth({ x, y }, fragMesh);
-				if (pixelDepth < bufferPtr->getDepth(x, y) && pixelDepth > 0.f)
+				if (pixelDepth <= bufferPtr->getDepth(x, y))
 					checkPixel({ x,y }, pixelDepth, fragMesh.color, bufferPtr);
 			}
 		}
