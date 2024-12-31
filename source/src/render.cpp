@@ -1,4 +1,5 @@
 #include "render.hpp"
+#include <chrono>
 
 void Render::regularRender(const Uniforms& uniforms,
 	const Shader& shader) const {
@@ -114,11 +115,16 @@ void Render::naiveHierarchyRender(const Shader& shader,
 	// 对所有顶点进行变换
 	shader.getVertexShader()(screenVertices, uniforms);
 
+	//auto start = std::chrono::high_resolution_clock::now();
 	// 建立四叉树
 	std::shared_ptr<QuadTree> root = std::make_shared<QuadTree>(BBOX{ 0,0,
 		static_cast<int>(bufferPtr->getWidth()),
 		static_cast<int>(bufferPtr->getHeight())
 		});
+
+	//auto end = std::chrono::high_resolution_clock::now();
+	//const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+	//std::cout << "construct quad_tree time: " << duration << " ms" << std::endl;
 
 	BBOX screenBBox({ 0, 0, static_cast<int>(bufferPtr->getWidth()),
 					   static_cast<int>(bufferPtr->getHeight()) });

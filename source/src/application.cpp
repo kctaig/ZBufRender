@@ -8,9 +8,6 @@ void Application::run() const {
 	glm::vec3 rotationAxis = glm::vec3(0.0f, 1.0f, 0.0f);
 
 	while (!glfwWindowShouldClose(windowPtr->getWindowPtr())) {
-		auto start = std::chrono::high_resolution_clock::now();
-
-		// set time
 		renderPtr->getBufferPtr()->clear(glm::vec3(0));
 		const auto curFrame = static_cast<float>(glfwGetTime());
 		windowPtr->deltaTime = curFrame - windowPtr->lastFrame;
@@ -28,6 +25,8 @@ void Application::run() const {
 			renderPtr->getBufferPtr()->getWidth(),
 			renderPtr->getBufferPtr()->getHeight());
 
+		/************************** render ***************************/
+		auto start = std::chrono::high_resolution_clock::now();
 		// render type
 		if (renderPtr->getRasterType() == REGULAR)
 			renderPtr->regularRender(*uniformsPtr, *shaderPtr);
@@ -35,6 +34,7 @@ void Application::run() const {
 			renderPtr->scanLineRender(*shaderPtr, *uniformsPtr);
 		else if (renderPtr->getRasterType() == NAIVE)
 			renderPtr->naiveHierarchyRender(*shaderPtr, *uniformsPtr);
+		auto end = std::chrono::high_resolution_clock::now();
 
 		// 设置像素操作参数
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -51,7 +51,7 @@ void Application::run() const {
 
 		glfwPollEvents();
 
-		auto end = std::chrono::high_resolution_clock::now();
+		// print execution time
 		const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 		std::cout << "Execution time: " << duration << " ms" << std::endl;
 	}
@@ -59,7 +59,7 @@ void Application::run() const {
 }
 
 void Application::init(size_t width, size_t height, RasterType rasterType) {
-	auto modelPtr = std::make_unique<Model>(R"(D:\code\ZBufRender\asserts)", "suzanne.obj");  // armadillo
+	auto modelPtr = std::make_unique<Model>(R"(D:\code\ZBufRender\asserts)", "armadillo.obj");  // armadillo
 	auto cameraPtr = std::make_shared<Camera>(glm::vec3(0.0f, 0.f, 6.0f));
 	std::shared_ptr<ZBuffer> bufferPtr;
 	if (rasterType == REGULAR) {

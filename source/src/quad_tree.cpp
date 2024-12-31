@@ -12,17 +12,17 @@ QuadTree::QuadTree(BBOX& bbox) {
 	int midX = (minX + maxX) / 2;
 	int midY = (minY + maxY) / 2;
 
-	if (minX + 1 == maxX && minY + 1 == maxY) {
+	if (minX + 1 == maxX || minY + 1 == maxY) {
 		return;
 	}
-	else if (minX + 1 < maxX && minY + 1 == maxY) {
-		children.push_back(std::make_shared<QuadTree>(BBOX(minX, minY, midX, maxY)));
-		children.push_back(std::make_shared<QuadTree>(BBOX(midX, minY, maxX, maxY)));
-	}
-	else if (minX + 1 == maxX && minY + 1 < maxY) {
-		children.push_back(std::make_shared<QuadTree>(BBOX(minX, minY, maxX, midY)));
-		children.push_back(std::make_shared<QuadTree>(BBOX(minX, midY, maxX, maxY)));
-	}
+	//else if (minX + 1 < maxX && minY + 1 == maxY) {
+	//	children.push_back(std::make_shared<QuadTree>(BBOX(minX, minY, midX, maxY)));
+	//	children.push_back(std::make_shared<QuadTree>(BBOX(midX, minY, maxX, maxY)));
+	//}
+	//else if (minX + 1 == maxX && minY + 1 < maxY) {
+	//	children.push_back(std::make_shared<QuadTree>(BBOX(minX, minY, maxX, midY)));
+	//	children.push_back(std::make_shared<QuadTree>(BBOX(minX, midY, maxX, maxY)));
+	//}
 	else {
 		children.push_back(std::make_shared<QuadTree>(BBOX(minX, minY, midX, midY)));
 		children.push_back(std::make_shared<QuadTree>(BBOX(midX, minY, maxX, midY)));
@@ -75,8 +75,10 @@ void QuadTree::checkPixel(glm::ivec2 pixel, float pixelDepth, glm::vec3 color, s
 
 	// 当前节点是包含pixel的最低节点
 	if (!containP) {
-		depth = pixelDepth;
-		//bufferPtr->setDepth(pixel.x, pixel.y, pixelDepth);
+		if (pixelDepth < bufferPtr->getDepth(pixel.x, pixel.y))
+			bufferPtr->setDepth(pixel.x, pixel.y, pixelDepth);
+		if (bufferPtr->getDepth(pixel.x, pixel.y) > depth)
+			depth = pixelDepth;
 		bufferPtr->setPixel(pixel.x, pixel.y, color);
 	}
 }
@@ -104,8 +106,8 @@ void QuadTree::checkFragMesh(const FragMesh& fragMesh, const Shader& shader, std
 			for (int y = fragMesh.ymin; y < fragMesh.ymax; y++) {
 				// 获取fragMesh中当前像素的深度值
 				auto pixelDepth = shader.calculateDepth({ x, y }, fragMesh);
-				//if (pixelDepth <= bufferPtr->getDepth(x, y))
-				checkPixel({ x,y }, pixelDepth, fragMesh.color, bufferPtr);
+				if (pixelDepth < bufferPtr->getDepth(x, y))
+					checkPixel({ x,y }, pixelDepth, fragMesh.color, bufferPtr);
 			}
 		}
 	}
