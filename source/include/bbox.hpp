@@ -1,29 +1,41 @@
 #pragma once
 
-#include "frag_mesh.hpp"
+#include <glm/glm.hpp>
+#include <vector>
 
-class BBOX {
-public:
-	BBOX() = default;
+struct BBOX {
+    int minX, minY, maxX, maxY;
 
-	~BBOX() = default;
+    BBOX() = default;
 
-	BBOX(int minX, int minY, int maxX, int maxY)
-		: minX(minX), minY(minY), maxX(maxX), maxY(maxY) {
-	}
+    ~BBOX() = default;
 
-	void updateBBox(const FragMesh& fragMesh);
+    BBOX(int minX, int minY, int maxX, int maxY)
+        : minX(minX), minY(minY), maxX(maxX), maxY(maxY) {
+    }
 
-	int getMinX() const { return minX; }
-	int getMinY() const { return minY; }
-	int getMaxX() const { return maxX; }
-	int getMaxY() const { return maxY; }
+    BBOX(const std::vector<glm::vec4>& screenVertices);
 
-	bool containFragMesh(const FragMesh& fragMesh) const;
+    void limitedToBBox(const BBOX& screenBBox);
 
-private:
-	int minX,
-		minY,
-		maxX,
-		maxY;
+    bool containBBox(const BBOX& bbox) const;
+};
+
+struct BBOX3d : public BBOX {
+    float minZ, maxZ;
+
+    BBOX3d() = default;
+
+    ~BBOX3d() = default;
+
+    BBOX3d(int minX, int minY, int maxX, int maxY, float minZ, float maxZ)
+        : BBOX(minX, minY, maxX, maxY), minZ(minZ), maxZ(maxZ) {
+    }
+
+    BBOX3d(BBOX bbox)
+        : BBOX(bbox), minZ(0.f), maxZ(1.f) {}
+
+    BBOX3d(const std::vector<glm::vec4>& screenVertices);
+
+    bool containBBox3d(const BBOX3d& subBBox3d) const;
 };

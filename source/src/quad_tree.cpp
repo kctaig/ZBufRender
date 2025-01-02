@@ -4,10 +4,10 @@ QuadTree::QuadTree(BBOX& bbox) {
 	depth = FLT_MAX;
 	bboxPtr = std::make_shared<BBOX>(bbox);
 
-	int minX = bbox.getMinX();
-	int minY = bbox.getMinY();
-	int maxX = bbox.getMaxX();
-	int maxY = bbox.getMaxY();
+	int minX = bbox.minX;
+	int minY = bbox.minY;
+	int maxX = bbox.maxX;
+	int maxY = bbox.maxY;
 
 	int midX = (minX + maxX) / 2;
 	int midY = (minY + maxY) / 2;
@@ -49,14 +49,14 @@ void QuadTree::updateDepth() {
 }
 
 bool QuadTree::containFragMesh(const FragMesh& fragMesh) const {
-	return bboxPtr->containFragMesh(fragMesh);
+	return bboxPtr->containBBox(fragMesh.bbox);
 }
 
 bool QuadTree::containPixel(glm::ivec2 pixel) const {
-	return pixel.x >= bboxPtr->getMinX()
-		&& pixel.x < bboxPtr->getMaxX()
-		&& pixel.y >= bboxPtr->getMinY()
-		&& pixel.y < bboxPtr->getMaxY();
+	return pixel.x >= bboxPtr->minX
+		&& pixel.x < bboxPtr->maxX
+		&& pixel.y >= bboxPtr->minY
+		&& pixel.y < bboxPtr->maxY;
 }
 
 void QuadTree::checkPixel(glm::ivec2 pixel, float pixelDepth, glm::vec3 color, std::shared_ptr<ZBuffer>bufferPtr) {
@@ -85,7 +85,7 @@ void QuadTree::checkPixel(glm::ivec2 pixel, float pixelDepth, glm::vec3 color, s
 
 void QuadTree::checkFragMesh(const FragMesh& fragMesh, const Shader& shader, std::shared_ptr<ZBuffer> bufferPtr) {
 	// fragMesh已被消隐，无需被绘制
-	if (fragMesh.zmin > depth)
+	if (fragMesh.bbox.minZ > depth)
 		return;
 
 	// 判断子节点是否包含fragMesh
@@ -102,12 +102,13 @@ void QuadTree::checkFragMesh(const FragMesh& fragMesh, const Shader& shader, std
 	// 当前节点是包含fragMesh的最低节点
 	if (!containFM) {
 		// 绘制fragMesh，更新深度
-		for (int x = fragMesh.xmin; x < fragMesh.xmax; x++) {
-			for (int y = fragMesh.ymin; y < fragMesh.ymax; y++) {
+		BBOX bbox = fragMesh.bbox;
+		for (int x = bbox.minX; x < bbox.maxX; x++) {
+			for (int y = bbox.minY; y < bbox.maxY; y++) {
 				// 获取fragMesh中当前像素的深度值
-				auto pixelDepth = shader.calculateDepth({ x, y }, fragMesh);
+				auto pixelDepth = shader.calculateDepth({x, y}, fragMesh);
 				if (pixelDepth < bufferPtr->getDepth(x, y))
-					checkPixel({ x,y }, pixelDepth, fragMesh.color, bufferPtr);
+					checkPixel({x, y}, pixelDepth, fragMesh.color, bufferPtr);
 			}
 		}
 	}

@@ -12,6 +12,8 @@ void Render::regularRender(const Uniforms& uniforms,
 	// 对所有顶点进行变换
 	shader.getVertexShader()(screenVertices, uniforms);
 
+	BBOX screenBBox{ 0, 0, static_cast<int>(bufferPtr->getWidth()),
+					 static_cast<int>(bufferPtr->getHeight()) };
 	FragMesh localFragMesh{ std::vector<glm::vec4>(3), std::vector<glm::vec3>(3), 3 };
 	for (int i = 0; i < triangles.size(); ++i) {
 		const auto& tri = triangles[i];
@@ -25,11 +27,10 @@ void Render::regularRender(const Uniforms& uniforms,
 		}
 		shader.getFragmentShader()(localFragMesh, uniforms);
 
-		BBOX bbox({ 0, 0, static_cast<int>(bufferPtr->getWidth()),
-				   static_cast<int>(bufferPtr->getHeight()) });
-		bbox.updateBBox(localFragMesh);
-		for (int x = bbox.getMinX(); x < bbox.getMaxX(); x++) {
-			for (int y = bbox.getMinY(); y < bbox.getMaxY(); y++) {
+		BBOX bbox(localFragMesh.v2d);
+		bbox.limitedToBBox(screenBBox);
+		for (int x = bbox.minX; x < bbox.maxX; x++) {
+			for (int y = bbox.minY; y < bbox.maxY; y++) {
 				auto depth = shader.calculateDepth({ x, y }, localFragMesh);
 				if (depth > bufferPtr->getDepth(x, y)) {
 					continue;
@@ -141,14 +142,8 @@ void Render::naiveHierarchyRender(const Shader& shader,
 			vertexIndex++;
 		}
 		shader.getFragmentShader()(localFragMesh, uniforms);
-		localFragMesh.init3dBbox();
-		// clip fragMesh
-		if (!screenBBox.containFragMesh(localFragMesh)) {
-			localFragMesh.xmin = std::max(static_cast<int>(localFragMesh.xmin), screenBBox.getMinX());
-			localFragMesh.ymin = std::max(static_cast<int>(localFragMesh.ymin), screenBBox.getMinY());
-			localFragMesh.xmax = std::min(static_cast<int>(localFragMesh.xmax), screenBBox.getMaxX());
-			localFragMesh.ymax = std::min(static_cast<int>(localFragMesh.ymax), screenBBox.getMaxY());
-		}
+		localFragMesh.bbox = BBOX3d(localFragMesh.v2d);
+		localFragMesh.bbox.limitedToBBox(screenBBox);
 		root->checkFragMesh(localFragMesh, shader, bufferPtr);
 	}
 }
