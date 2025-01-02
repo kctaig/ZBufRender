@@ -1,28 +1,25 @@
 #include "bbox.hpp"
 
 void BBOX::updateBBox(const FragMesh& fragMesh) {
-	int minx = static_cast<int>(floor(fragMesh.v2d[0].x));
-	int miny = static_cast<int>(floor(fragMesh.v2d[0].y));
-	int maxx = static_cast<int>(ceil(fragMesh.v2d[0].x));
-	int maxy = static_cast<int>(ceil(fragMesh.v2d[0].y));
+    int minx = static_cast<int>(floor(fragMesh.v2d[0].x));
+    int miny = static_cast<int>(floor(fragMesh.v2d[0].y));
+    int maxx = static_cast<int>(ceil(fragMesh.v2d[0].x));
+    int maxy = static_cast<int>(ceil(fragMesh.v2d[0].y));
 
-	for (size_t i = 1; i < fragMesh.vertexNum; i++) {
-		const auto& vertex = fragMesh.v2d[i];
-		minx = std::min(minx, static_cast<int>(vertex.x));
-		miny = std::min(miny, static_cast<int>(vertex.y));
-		maxx = std::max(maxx, static_cast<int>(vertex.x));
-		maxy = std::max(maxy, static_cast<int>(vertex.y));
-	}
+    for (size_t i = 1; i < fragMesh.vertexNum; i++) {
+        const auto& vertex = fragMesh.v2d[i];
+        minx = std::min(minx, static_cast<int>(vertex.x));
+        miny = std::min(miny, static_cast<int>(vertex.y));
+        maxx = std::max(maxx, static_cast<int>(vertex.x));
+        maxy = std::max(maxy, static_cast<int>(vertex.y));
+    }
 
-	minX = std::max(minX, minx);
-	minY = std::max(minY, miny);
-	maxX = std::min(maxX, maxx);
-	maxY = std::min(maxY, maxy);
+    minX = std::max(minX, minx);
+    minY = std::max(minY, miny);
+    maxX = std::min(maxX, maxx);
+    maxY = std::min(maxY, maxy);
 }
 
 bool BBOX::containFragMesh(const FragMesh& fragMesh) const {
-	return fragMesh.xmin >= minX
-		&& fragMesh.ymin >= minY
-		&& fragMesh.xmax < maxX
-		&& fragMesh.ymax < maxY;
+    return fragMesh.xmin >= minX && fragMesh.ymin >= minY && fragMesh.xmax < maxX && fragMesh.ymax < maxY;
 }

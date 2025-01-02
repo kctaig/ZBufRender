@@ -30,8 +30,6 @@ public:
 
 	void modelInfo() const;
 
-	// glm::vec3 calculateNormal(const Mesh &mesh) const;
-
 private:
 	std::vector<Mesh> triangles;
 	std::vector<Vertex> vertices;

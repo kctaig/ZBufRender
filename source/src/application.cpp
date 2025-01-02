@@ -34,6 +34,8 @@ void Application::run() const {
 			renderPtr->scanLineRender(*shaderPtr, *uniformsPtr);
 		else if (renderPtr->getRasterType() == NAIVE)
 			renderPtr->naiveHierarchyRender(*shaderPtr, *uniformsPtr);
+		else if (renderPtr->getRasterType() == OCTREE)
+			renderPtr->octreeHierarchyRender(*shaderPtr, *uniformsPtr);
 		auto end = std::chrono::high_resolution_clock::now();
 
 		// 设置像素操作参数
@@ -68,8 +70,8 @@ void Application::init(size_t width, size_t height, RasterType rasterType) {
 	else if (rasterType == SCANLINE) {
 		bufferPtr = std::make_shared<ScanLineZBuffer>(width, height);
 	}
-	else if (rasterType == NAIVE) {
-		bufferPtr = std::make_shared<NaiveHierarchyZBuffer>(width, height);
+	else if (rasterType == NAIVE || rasterType == OCTREE) {
+		bufferPtr = std::make_shared<HierarchyZBuffer>(width, height);
 	}
 
 	renderPtr = std::make_unique<Render>(std::move(modelPtr), cameraPtr, bufferPtr, rasterType);

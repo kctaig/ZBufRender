@@ -83,11 +83,11 @@ private:
 	std::unique_ptr<std::vector<AETNode> > aetPtr{};
 };
 
-class NaiveHierarchyZBuffer : public ZBuffer {
+class HierarchyZBuffer : public ZBuffer {
 public:
-	NaiveHierarchyZBuffer() = default;
+	HierarchyZBuffer() = default;
 
-	NaiveHierarchyZBuffer(size_t width, size_t height);
+	HierarchyZBuffer(size_t width, size_t height);
 
 	void clear(glm::vec3 color) override;
 

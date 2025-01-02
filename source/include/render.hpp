@@ -9,9 +9,10 @@
 #include "shader.hpp"
 
 enum RasterType {
-	REGULAR,
-	SCANLINE,
-	NAIVE
+    REGULAR,
+    SCANLINE,
+    NAIVE,
+    OCTREE
 };
 
 class Render {
@@ -36,6 +37,9 @@ public:
 		const Uniforms& uniforms) const;
 
 	void naiveHierarchyRender(const Shader& shader,
+		const Uniforms& uniforms) const;
+
+	void octreeHierarchyRender(const Shader& shader,
 		const Uniforms& uniforms) const;
 
 	auto getCameraPtr() const { return cameraPtr; }

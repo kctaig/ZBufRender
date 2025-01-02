@@ -105,7 +105,7 @@ void Render::scanLineRender(const Shader& shader,
 
 void Render::naiveHierarchyRender(const Shader& shader,
 	const Uniforms& uniforms) const {
-	auto naiveHierarchyBufferPtr = std::dynamic_pointer_cast<NaiveHierarchyZBuffer>(bufferPtr);
+	auto naiveHierarchyBufferPtr = std::dynamic_pointer_cast<HierarchyZBuffer>(bufferPtr);
 	const auto& vertices = modelPtr->getVertices();
 	const auto& triangles = modelPtr->getTriangles();
 	std::vector<glm::vec4> screenVertices;
@@ -115,6 +115,8 @@ void Render::naiveHierarchyRender(const Shader& shader,
 	// 对所有顶点进行变换
 	shader.getVertexShader()(screenVertices, uniforms);
 
+	//todo: 避免重复构建四叉树
+	
 	//auto start = std::chrono::high_resolution_clock::now();
 	// 建立四叉树
 	std::shared_ptr<QuadTree> root = std::make_shared<QuadTree>(BBOX{ 0,0,
@@ -149,4 +151,21 @@ void Render::naiveHierarchyRender(const Shader& shader,
 		}
 		root->checkFragMesh(localFragMesh, shader, bufferPtr);
 	}
+}
+
+void Render::octreeHierarchyRender(const Shader& shader,
+	const Uniforms& uniforms) const {
+	auto octreeHierarchyBufferPtr = std::dynamic_pointer_cast<HierarchyZBuffer>(bufferPtr);
+	const auto& vertices = modelPtr->getVertices();
+	const auto& triangles = modelPtr->getTriangles();
+	std::vector<glm::vec4> screenVertices;
+	for (const Vertex& vertex : vertices) {
+		screenVertices.push_back(glm::vec4(vertex.pos, 1.0));
+	}
+	shader.getVertexShader()(screenVertices, uniforms);
+
+	std::shared_ptr<QuadTree> root = std::make_shared<QuadTree>(BBOX{ 0,0,
+		static_cast<int>(bufferPtr->getWidth()),
+		static_cast<int>(bufferPtr->getHeight())
+		});
 }
