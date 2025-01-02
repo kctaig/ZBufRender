@@ -7,6 +7,7 @@
 #include "model.hpp"
 #include "quad_tree.hpp"
 #include "shader.hpp"
+#include "octree.hpp"
 
 enum RasterType {
     REGULAR,

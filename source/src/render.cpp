@@ -13,7 +13,7 @@ void Render::regularRender(const Uniforms& uniforms,
 	shader.getVertexShader()(screenVertices, uniforms);
 
 	BBOX screenBBox{ 0, 0, static_cast<int>(bufferPtr->getWidth()),
-					 static_cast<int>(bufferPtr->getHeight()) };
+					static_cast<int>(bufferPtr->getHeight()) };
 	FragMesh localFragMesh{ std::vector<glm::vec4>(3), std::vector<glm::vec3>(3), 3 };
 	for (int i = 0; i < triangles.size(); ++i) {
 		const auto& tri = triangles[i];
@@ -116,21 +116,20 @@ void Render::naiveHierarchyRender(const Shader& shader,
 	// 对所有顶点进行变换
 	shader.getVertexShader()(screenVertices, uniforms);
 
-	//todo: 避免重复构建四叉树
-	
-	//auto start = std::chrono::high_resolution_clock::now();
-	// 建立四叉树
-	std::shared_ptr<QuadTree> root = std::make_shared<QuadTree>(BBOX{ 0,0,
-		static_cast<int>(bufferPtr->getWidth()),
-		static_cast<int>(bufferPtr->getHeight())
-		});
+	// todo: 避免重复构建四叉树
 
-	//auto end = std::chrono::high_resolution_clock::now();
-	//const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-	//std::cout << "construct quad_tree time: " << duration << " ms" << std::endl;
+	// auto start = std::chrono::high_resolution_clock::now();
+	//  建立四叉树
+	std::shared_ptr<QuadTree> quadTreeRoot = std::make_shared<QuadTree>(BBOX{ 0, 0,
+																			 static_cast<int>(bufferPtr->getWidth()),
+																			 static_cast<int>(bufferPtr->getHeight()) });
+
+	// auto end = std::chrono::high_resolution_clock::now();
+	// const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+	// std::cout << "construct quad_tree time: " << duration << " ms" << std::endl;
 
 	BBOX screenBBox({ 0, 0, static_cast<int>(bufferPtr->getWidth()),
-					   static_cast<int>(bufferPtr->getHeight()) });
+					 static_cast<int>(bufferPtr->getHeight()) });
 
 	FragMesh localFragMesh{ std::vector<glm::vec4>(3), std::vector<glm::vec3>(3), 3 };
 	for (int i = 0; i < triangles.size(); ++i) {
@@ -144,7 +143,7 @@ void Render::naiveHierarchyRender(const Shader& shader,
 		shader.getFragmentShader()(localFragMesh, uniforms);
 		localFragMesh.bbox = BBOX3d(localFragMesh.v2d);
 		localFragMesh.bbox.limitedToBBox(screenBBox);
-		root->checkFragMesh(localFragMesh, shader, bufferPtr);
+		quadTreeRoot->checkFragMesh(localFragMesh, shader, bufferPtr);
 	}
 }
 
@@ -154,13 +153,39 @@ void Render::octreeHierarchyRender(const Shader& shader,
 	const auto& vertices = modelPtr->getVertices();
 	const auto& triangles = modelPtr->getTriangles();
 	std::vector<glm::vec4> screenVertices;
+
 	for (const Vertex& vertex : vertices) {
 		screenVertices.push_back(glm::vec4(vertex.pos, 1.0));
 	}
 	shader.getVertexShader()(screenVertices, uniforms);
 
-	std::shared_ptr<QuadTree> root = std::make_shared<QuadTree>(BBOX{ 0,0,
-		static_cast<int>(bufferPtr->getWidth()),
-		static_cast<int>(bufferPtr->getHeight())
-		});
+	BBOX screenBBox({ 0, 0, static_cast<int>(bufferPtr->getWidth()),
+					 static_cast<int>(bufferPtr->getHeight()) });
+
+	std::vector<FragMesh> fragMeshes;
+	for (int i = 0; i < triangles.size(); ++i) {
+		const auto& tri = triangles[i];
+		FragMesh fragMesh{ std::vector<glm::vec4>(3), std::vector<glm::vec3>(3), 3 };
+		size_t vertexIndex = 0;
+		for (const auto& index : tri.indices) {
+			fragMesh.v3d[vertexIndex] = vertices[index].pos;
+			fragMesh.v2d[vertexIndex] = screenVertices[index];
+			vertexIndex++;
+		}
+		shader.getFragmentShader()(fragMesh, uniforms);
+		fragMesh.bbox = BBOX3d(fragMesh.v2d);
+		fragMesh.bbox.limitedToBBox(screenBBox);
+		fragMeshes.push_back(fragMesh);
+	}
+	std::shared_ptr<QuadTree> quadTreeRoot = std::make_shared<QuadTree>(
+		BBOX{ 0, 0,
+			 static_cast<int>(bufferPtr->getWidth()),
+			 static_cast<int>(bufferPtr->getHeight()) });
+
+	std::shared_ptr<Octree> octreeRoot = std::make_shared<Octree>(
+		BBOX3d{ 0, 0, 0.f,
+			   static_cast<int>(bufferPtr->getWidth()),
+			   static_cast<int>(bufferPtr->getHeight()), 1.f },
+		fragMeshes);
+	quadTreeRoot->checkOctree(octreeRoot, shader, bufferPtr);
 }
