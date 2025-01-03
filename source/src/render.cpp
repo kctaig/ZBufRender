@@ -43,6 +43,8 @@ void Render::regularRender(const Uniforms& uniforms,
 
 void Render::scanLineRender(const Shader& shader,
 	const Uniforms& uniforms) const {
+	//auto start = std::chrono::high_resolution_clock::now();
+
 	auto scanLineBufferPtr = std::dynamic_pointer_cast<ScanLineZBuffer>(bufferPtr);
 
 	const auto& vertices = modelPtr->getVertices();
@@ -54,6 +56,7 @@ void Render::scanLineRender(const Shader& shader,
 	// 对所有顶点进行变换
 	shader.getVertexShader()(screenVertices, uniforms);
 
+	//auto start = std::chrono::high_resolution_clock::now();
 	// 建立 fragMesh
 	std::shared_ptr<FragMesh> fragMeshptr = std::make_shared<FragMesh>(3);
 	for (int i = 0; i < triangles.size(); ++i) {
@@ -69,7 +72,11 @@ void Render::scanLineRender(const Shader& shader,
 		// construct CPTNOde
 		scanLineBufferPtr->fragMeshToCPT(*fragMeshptr, i);
 	}
+	//auto end = std::chrono::high_resolution_clock::now();
+	//const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+	//std::cout << "construct Classification Polygon Table time: " << duration << " ms" << std::endl;
 
+	//auto start = std::chrono::high_resolution_clock::now();
 	// construct AET and rend scan line pixel
 	for (int y = static_cast<int>(scanLineBufferPtr->getHeight()) - 1; y >= 0; y--) {
 		// clear depth
@@ -98,6 +105,9 @@ void Render::scanLineRender(const Shader& shader,
 		// update AET
 		scanLineBufferPtr->updateAET();
 	}
+	/*auto end = std::chrono::high_resolution_clock::now();
+	const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+	std::cout << "construct Classification Polygon Table time: " << duration << " ms" << std::endl;*/
 }
 
 void Render::naiveHierarchyRender(const Shader& shader,

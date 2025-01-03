@@ -54,7 +54,7 @@ void ScanLineZBuffer::fragMeshToCPT(const FragMesh& fragMesh,
 	const int id) const {
 	auto v2dNormal = fragMesh.calculateV2dNormal();
 	auto v3dNormal = fragMesh.calculateV3dNormal();
-	// if (v2dNormal.z == 0.f) return;
+	if (v2dNormal.z == 0.f) return;
 
 	auto v2d = fragMesh.v2d;
 	auto v3d = fragMesh.v3d;
