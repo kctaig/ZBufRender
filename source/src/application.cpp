@@ -5,7 +5,7 @@ void Application::run() const {
 
 	float angle = 0.0f;
 	float angularSpeed = 20.0f;  // 每秒旋转20度
-	glm::vec3 rotationAxis = glm::vec3(0.0f, 1.0f, 0.0f);
+	glm::vec3 rotationAxis = glm::vec3(0.0f, 1.0f, 0.0f); // 绕y轴旋转
 
 	while (!glfwWindowShouldClose(windowPtr->getWindowPtr())) {
 		renderPtr->getBufferPtr()->clear(glm::vec3(0));
@@ -27,7 +27,6 @@ void Application::run() const {
 
 		/************************** render ***************************/
 		auto start = std::chrono::high_resolution_clock::now();
-		// render type
 		if (renderPtr->getRasterType() == REGULAR)
 			renderPtr->regularRender(*uniformsPtr, *shaderPtr);
 		else if (renderPtr->getRasterType() == SCANLINE)
@@ -60,8 +59,7 @@ void Application::run() const {
 	glfwTerminate();
 }
 
-void Application::init(size_t width, size_t height, RasterType rasterType) {
-	auto modelPtr = std::make_unique<Model>(R"(D:\code\ZBufRender\asserts)", "armadillo.obj");  // armadillo
+void Application::init(size_t width, size_t height, RasterType rasterType, std::unique_ptr<Model> modelPtr) {
 	auto cameraPtr = std::make_shared<Camera>(glm::vec3(0.0f, 0.f, 6.0f));
 	std::shared_ptr<ZBuffer> bufferPtr;
 	if (rasterType == REGULAR) {

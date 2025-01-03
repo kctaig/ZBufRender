@@ -12,7 +12,9 @@ public:
 
 	~Application() = default;
 
-	Application(size_t width, size_t height, RasterType rasterType) { init(width, height, rasterType); }
+	Application(size_t width, size_t height, RasterType rasterType, std::unique_ptr<Model> modelPtr) {
+		init(width, height, rasterType, std::move(modelPtr));
+	}
 
 	void run() const;
 
@@ -21,6 +23,5 @@ private:
 	std::unique_ptr<Shader> shaderPtr;
 	std::shared_ptr<Uniforms> uniformsPtr;
 	std::unique_ptr<Render> renderPtr;
-
-	void init(size_t width, size_t height, RasterType rasterType);
+	void init(size_t width, size_t height, RasterType rasterType, std::unique_ptr<Model> modelPtr);
 };
