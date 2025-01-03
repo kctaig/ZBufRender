@@ -1,6 +1,7 @@
 #include "zbuffer.hpp"
 
 #include "quad_tree.hpp"
+#include <chrono>
 
 /**************************** ZBuffer *******************************/
 
@@ -180,13 +181,18 @@ void ScanLineZBuffer::bufferResize(size_t w, size_t h, glm::vec3 color) {
 	cptPtr->resize(h);
 }
 
-/**************************** NaiveZBuffer *******************************/
+/**************************** HierarchyZBuffer *******************************/
 
 HierarchyZBuffer::HierarchyZBuffer(size_t width, size_t height)
 	: ZBuffer(width, height) {
 	depthPtr = std::make_unique<std::vector<float>>(width * height, 1.f);
 	pixelPtr = std::make_unique<std::vector<glm::u8vec3>>(width * height, glm::u8vec3(0));
+
+	auto start = std::chrono::high_resolution_clock::now();
 	QuadTreeRoot = std::make_shared<QuadTree>(BBOX{ 0, 0,static_cast<int>(width),static_cast<int>(height) });
+	auto end = std::chrono::high_resolution_clock::now();
+	const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+	std::cout << "QuadTree Construct Time : " << duration << " ms" << std::endl;
 }
 
 void HierarchyZBuffer::clear(glm::vec3 color) {

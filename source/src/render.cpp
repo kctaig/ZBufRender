@@ -182,15 +182,24 @@ void Render::octreeHierarchyRender(const Shader& shader,
 		minZ = std::min(minZ, fragMeshptr->bbox.minZ);
 		maxZ = std::max(maxZ, fragMeshptr->bbox.maxZ);
 	}
+
+	auto octreeHierarchyBufferPtr = std::dynamic_pointer_cast<HierarchyZBuffer>(bufferPtr);
+
 	auto start = std::chrono::high_resolution_clock::now();
+	// construct octree
 	std::shared_ptr<Octree> octreeRoot = std::make_shared<Octree>(
 		BBOX3d{ 0, 0, minZ,
 			   static_cast<int>(bufferPtr->getWidth()),
 			   static_cast<int>(bufferPtr->getHeight()), maxZ },
 		fragMeshesPtr);
-	auto octreeHierarchyBufferPtr = std::dynamic_pointer_cast<HierarchyZBuffer>(bufferPtr);
+
+	auto end1 = std::chrono::high_resolution_clock::now();
+	// check octree
 	octreeHierarchyBufferPtr->getQuadTreeRoot()->checkOctree(octreeRoot, shader, bufferPtr);
-	auto end = std::chrono::high_resolution_clock::now();
-	const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-	std::cout << "Octree Hierarchy ZBuffer Rendering Time : " << duration << " ms" << std::endl;
+	auto end2 = std::chrono::high_resolution_clock::now();
+
+	const auto duration1 = std::chrono::duration_cast<std::chrono::milliseconds>(end1 - start).count();
+	const auto duration2 = std::chrono::duration_cast<std::chrono::milliseconds>(end2 - end1).count();
+	std::cout << "Octree Hierarchy ZBuffer Construct Time : " << duration1 << " ms" << std::endl;
+	std::cout << "Rendering Time : " << duration2 << " ms" << std::endl;
 }

@@ -1,5 +1,6 @@
 #include "quad_tree.hpp"
 #include "zbuffer.hpp"
+#include <numeric>
 
 QuadTree::QuadTree(BBOX& bbox) {
 	depth = FLT_MAX;
@@ -33,12 +34,10 @@ void QuadTree::resetDepth(float d) {
 void QuadTree::updateQuadTreeDepth() {
 	if (children.empty())
 		return;
-
-	float tempDepth = FLT_MIN;
-	for (auto& child : children) {
-		tempDepth = std::max(tempDepth, child->getDepth());
-	}
-	depth = tempDepth;
+	depth = std::accumulate(children.begin(), children.end(), FLT_MIN,
+		[](float acc, const std::shared_ptr<QuadTree>& child) {
+			return std::max(acc, child->depth);
+		});
 }
 
 bool QuadTree::containFragMesh(const FragMesh& fragMesh) const {
@@ -66,7 +65,6 @@ void QuadTree::checkPixel(glm::ivec2 pixel, float pixelDepth, glm::vec3 color, s
 			break;
 		}
 	}
-
 	// 当前节点是包含pixel的最低节点
 	if (!containP) {
 		if (pixelDepth < bufferPtr->getDepth(pixel.x, pixel.y))
