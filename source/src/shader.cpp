@@ -5,7 +5,6 @@ void vertexShader(std::vector<glm::vec4>& vertices, const Uniforms& uniforms) {
 		auto clipPos = uniforms.projection * uniforms.view * uniforms.model * vertex;
 		// NDC pos
 		const float w = clipPos.w;
-		assert(w != 0.0f);
 		glm::vec4 NDC = clipPos / w;
 		NDC.w = w;
 
@@ -13,6 +12,7 @@ void vertexShader(std::vector<glm::vec4>& vertices, const Uniforms& uniforms) {
 		glm::vec4 fragPos = NDC;
 		fragPos.x = (NDC.x + 1.f) * .5f * static_cast<float>(uniforms.screenWidth);
 		fragPos.y = (NDC.y + 1.f) * .5f * static_cast<float>(uniforms.screenHeight);
+		fragPos.z = (NDC.z + 1.f) * .5f;
 
 		// ×ª³ÉÆÁÄ»ÏñËØ×ø±ê
 		int screenX = static_cast<int>(fragPos.x + .5f);

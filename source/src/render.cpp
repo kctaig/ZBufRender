@@ -163,6 +163,7 @@ void Render::octreeHierarchyRender(const Shader& shader,
 					 static_cast<int>(bufferPtr->getHeight()) });
 
 	std::vector<FragMesh> fragMeshes;
+	float minZ = FLT_MAX, maxZ = FLT_MIN;
 	for (int i = 0; i < triangles.size(); ++i) {
 		const auto& tri = triangles[i];
 		FragMesh fragMesh{ std::vector<glm::vec4>(3), std::vector<glm::vec3>(3), 3 };
@@ -176,6 +177,8 @@ void Render::octreeHierarchyRender(const Shader& shader,
 		fragMesh.bbox = BBOX3d(fragMesh.v2d);
 		fragMesh.bbox.limitedToBBox(screenBBox);
 		fragMeshes.push_back(fragMesh);
+		minZ = std::min(minZ, fragMesh.bbox.minZ);
+		maxZ = std::max(maxZ, fragMesh.bbox.maxZ);
 	}
 	std::shared_ptr<QuadTree> quadTreeRoot = std::make_shared<QuadTree>(
 		BBOX{ 0, 0,
@@ -183,9 +186,9 @@ void Render::octreeHierarchyRender(const Shader& shader,
 			 static_cast<int>(bufferPtr->getHeight()) });
 
 	std::shared_ptr<Octree> octreeRoot = std::make_shared<Octree>(
-		BBOX3d{ 0, 0, 0.f,
+		BBOX3d{ 0, 0, minZ,
 			   static_cast<int>(bufferPtr->getWidth()),
-			   static_cast<int>(bufferPtr->getHeight()), 1.f },
+			   static_cast<int>(bufferPtr->getHeight()), maxZ },
 		fragMeshes);
 	quadTreeRoot->checkOctree(octreeRoot, shader, bufferPtr);
 }
