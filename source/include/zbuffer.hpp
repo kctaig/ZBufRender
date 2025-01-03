@@ -70,7 +70,7 @@ public:
 
 	void clear(glm::vec3 color) override;
 
-	void clearDepth() { depthPtr->assign(width, 1.f); }
+	void clearLineDepth() { depthPtr->assign(width, 1.f); }
 
 	auto getDepth(int x) { return depthPtr->at(x); }
 	void setDepth(int x, float depth) { depthPtr->at(x) = depth; }

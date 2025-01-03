@@ -17,7 +17,7 @@ void Application::run() const {
 		Window::processInput(windowPtr->getWindowPtr());
 
 		// rotate
-		angle += angularSpeed * windowPtr->deltaTime;
+		//angle += angularSpeed * windowPtr->deltaTime;
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::rotate(model, glm::radians(angle), rotationAxis);
 		uniformsPtr->updateModel(model);
@@ -26,7 +26,6 @@ void Application::run() const {
 			renderPtr->getBufferPtr()->getHeight());
 
 		/************************** render ***************************/
-		auto start = std::chrono::high_resolution_clock::now();
 		if (renderPtr->getRasterType() == REGULAR)
 			renderPtr->regularRender(*uniformsPtr, *shaderPtr);
 		else if (renderPtr->getRasterType() == SCANLINE)
@@ -35,7 +34,6 @@ void Application::run() const {
 			renderPtr->naiveHierarchyRender(*shaderPtr, *uniformsPtr);
 		else if (renderPtr->getRasterType() == OCTREE)
 			renderPtr->octreeHierarchyRender(*shaderPtr, *uniformsPtr);
-		auto end = std::chrono::high_resolution_clock::now();
 
 		// 设置像素操作参数
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -49,12 +47,7 @@ void Application::run() const {
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		// glfwSwapInterval(1);
 		glfwSwapBuffers(windowPtr->getWindowPtr());
-
 		glfwPollEvents();
-
-		// print execution time
-		const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-		std::cout << "Execution time: " << duration << " ms" << std::endl;
 	}
 	glfwTerminate();
 }

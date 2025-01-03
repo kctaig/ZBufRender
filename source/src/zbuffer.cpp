@@ -186,10 +186,7 @@ HierarchyZBuffer::HierarchyZBuffer(size_t width, size_t height)
 	: ZBuffer(width, height) {
 	depthPtr = std::make_unique<std::vector<float>>(width * height, 1.f);
 	pixelPtr = std::make_unique<std::vector<glm::u8vec3>>(width * height, glm::u8vec3(0));
-	QuadTreeRoot = std::make_shared<QuadTree>(
-		BBOX{ 0, 0,
-			 static_cast<int>(width),
-			 static_cast<int>(height) });
+	QuadTreeRoot = std::make_shared<QuadTree>(BBOX{ 0, 0,static_cast<int>(width),static_cast<int>(height) });
 }
 
 void HierarchyZBuffer::clear(glm::vec3 color) {
@@ -203,4 +200,5 @@ void HierarchyZBuffer::bufferResize(size_t w, size_t h, glm::vec3 color) {
 	height = h;
 	depthPtr->resize(w * h, 1.f);
 	pixelPtr->resize(w * h, toU8Vec3(color));
+	QuadTreeRoot = std::make_shared<QuadTree>(BBOX{ 0, 0, static_cast<int>(w), static_cast<int>(h) });
 }

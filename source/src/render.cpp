@@ -15,6 +15,8 @@ void Render::regularRender(const Uniforms& uniforms,
 					static_cast<int>(bufferPtr->getHeight()) };
 
 	std::shared_ptr<FragMesh> fragMeshptr = std::make_shared<FragMesh>(3);
+
+	auto start = std::chrono::high_resolution_clock::now();
 	for (int i = 0; i < triangles.size(); ++i) {
 		const auto& tri = triangles[i];
 		size_t vertexIndex = 0;
@@ -39,12 +41,13 @@ void Render::regularRender(const Uniforms& uniforms,
 			}
 		}
 	}
+	auto end = std::chrono::high_resolution_clock::now();
+	const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+	std::cout << "Standard ZBuffer Rendering Time : " << duration << " ms" << std::endl;
 }
 
 void Render::scanLineRender(const Shader& shader,
 	const Uniforms& uniforms) const {
-	//auto start = std::chrono::high_resolution_clock::now();
-
 	auto scanLineBufferPtr = std::dynamic_pointer_cast<ScanLineZBuffer>(bufferPtr);
 
 	const auto& vertices = modelPtr->getVertices();
@@ -56,8 +59,7 @@ void Render::scanLineRender(const Shader& shader,
 	// 对所有顶点进行变换
 	shader.getVertexShader()(screenVertices, uniforms);
 
-	//auto start = std::chrono::high_resolution_clock::now();
-	// 建立 fragMesh
+	auto start = std::chrono::high_resolution_clock::now();
 	std::shared_ptr<FragMesh> fragMeshptr = std::make_shared<FragMesh>(3);
 	for (int i = 0; i < triangles.size(); ++i) {
 		const auto& tri = triangles[i];
@@ -72,15 +74,15 @@ void Render::scanLineRender(const Shader& shader,
 		// construct CPTNOde
 		scanLineBufferPtr->fragMeshToCPT(*fragMeshptr, i);
 	}
-	//auto end = std::chrono::high_resolution_clock::now();
-	//const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-	//std::cout << "construct Classification Polygon Table time: " << duration << " ms" << std::endl;
+	auto end = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+	std::cout << "Classification Polygon Table Construct Time: " << duration << " ms" << std::endl;
 
-	//auto start = std::chrono::high_resolution_clock::now();
+	start = std::chrono::high_resolution_clock::now();
 	// construct AET and rend scan line pixel
-	for (int y = static_cast<int>(scanLineBufferPtr->getHeight()) - 1; y >= 0; y--) {
+	for (int y = static_cast<int>(bufferPtr->getHeight()) - 1; y >= 0; y--) {
 		// clear depth
-		scanLineBufferPtr->clearDepth();
+		scanLineBufferPtr->clearLineDepth();
 		// check CPT
 		scanLineBufferPtr->checkCPT(y);
 		// render scan line pixel
@@ -105,9 +107,9 @@ void Render::scanLineRender(const Shader& shader,
 		// update AET
 		scanLineBufferPtr->updateAET();
 	}
-	/*auto end = std::chrono::high_resolution_clock::now();
-	const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-	std::cout << "construct Classification Polygon Table time: " << duration << " ms" << std::endl;*/
+	end = std::chrono::high_resolution_clock::now();
+	duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+	std::cout << "ScanLine ZBuffer Rendering Time: " << duration << " ms" << std::endl;
 }
 
 void Render::naiveHierarchyRender(const Shader& shader,
@@ -127,6 +129,7 @@ void Render::naiveHierarchyRender(const Shader& shader,
 
 	auto naiveHierarchyBufferPtr = std::dynamic_pointer_cast<HierarchyZBuffer>(bufferPtr);
 	std::shared_ptr<FragMesh> fragMeshptr = std::make_shared<FragMesh>(3);
+	auto start = std::chrono::high_resolution_clock::now();
 	for (int i = 0; i < triangles.size(); ++i) {
 		const auto& tri = triangles[i];
 		size_t vertexIndex = 0;
@@ -140,10 +143,14 @@ void Render::naiveHierarchyRender(const Shader& shader,
 		fragMeshptr->bbox.limitedToBBox(screenBBox);
 		naiveHierarchyBufferPtr->getQuadTreeRoot()->checkFragMesh(*fragMeshptr, shader, bufferPtr);
 	}
+	auto end = std::chrono::high_resolution_clock::now();
+	const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+	std::cout << "Naive Hierarchy ZBuffer Rendering Time : " << duration << " ms" << std::endl;
 }
 
 void Render::octreeHierarchyRender(const Shader& shader,
 	const Uniforms& uniforms) const {
+	bufferPtr->clear(glm::vec3(0.f));
 	const auto& vertices = modelPtr->getVertices();
 	const auto& triangles = modelPtr->getTriangles();
 	std::vector<glm::vec4> screenVertices;
@@ -176,15 +183,14 @@ void Render::octreeHierarchyRender(const Shader& shader,
 		maxZ = std::max(maxZ, fragMeshptr->bbox.maxZ);
 	}
 	auto start = std::chrono::high_resolution_clock::now();
-	bufferPtr->clear(glm::vec3(0.f));
 	std::shared_ptr<Octree> octreeRoot = std::make_shared<Octree>(
 		BBOX3d{ 0, 0, minZ,
 			   static_cast<int>(bufferPtr->getWidth()),
 			   static_cast<int>(bufferPtr->getHeight()), maxZ },
 		fragMeshesPtr);
-	auto end = std::chrono::high_resolution_clock::now();
-	const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-	std::cout << "construct octree time: " << duration << " ms" << std::endl;
 	auto octreeHierarchyBufferPtr = std::dynamic_pointer_cast<HierarchyZBuffer>(bufferPtr);
 	octreeHierarchyBufferPtr->getQuadTreeRoot()->checkOctree(octreeRoot, shader, bufferPtr);
+	auto end = std::chrono::high_resolution_clock::now();
+	const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+	std::cout << "Octree Hierarchy ZBuffer Rendering Time : " << duration << " ms" << std::endl;
 }
