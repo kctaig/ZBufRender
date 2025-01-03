@@ -1,4 +1,5 @@
 #include "quad_tree.hpp"
+#include "zbuffer.hpp"
 
 QuadTree::QuadTree(BBOX& bbox) {
 	depth = FLT_MAX;

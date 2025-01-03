@@ -6,7 +6,8 @@
 #include "bbox.hpp"
 #include "octree.hpp"
 #include "shader.hpp"
-#include "zbuffer.hpp"
+
+class ZBuffer;
 
 class QuadTree {
 public:
@@ -19,7 +20,7 @@ public:
 	std::shared_ptr<BBOX> getBBoxPtr() const { return bboxPtr; }
 
 	void setDepth(float d) { depth = d; }
-	void resetDepth(float d);
+	void resetDepth(float d = FLT_MAX);
 	float getDepth() const { return depth; }
 
 	void checkFragMesh(const FragMesh& fragMesh, const Shader& shader, std::shared_ptr<ZBuffer> bufferPtr);

@@ -17,6 +17,7 @@ struct curContext {
 	float* lastXPtr, * lastYPtr;
 	bool* firstMousePtr;
 	float* deltaTimePtr, * lastFramePtr;
+	bool* useMousePtr;
 };
 
 class Window {
@@ -30,9 +31,6 @@ public:
 	Window& operator=(const Window&) = delete;
 
 	Window(const size_t& width, const size_t& height, const char* title);
-
-	// ÒÑ·ÏÆú
-	// void drawFrameBuffer(const ZBuffer &fb) const;
 
 	size_t getWidth() const { return width; }
 	size_t getHeight() const { return height; }
@@ -48,6 +46,7 @@ public:
 	float lastX, lastY;
 	bool firstMouse = true;
 	float deltaTime = 0.0f, lastFrame = 0.0f;
+	bool useMouse = true;
 
 private:
 	size_t width{}, height{};

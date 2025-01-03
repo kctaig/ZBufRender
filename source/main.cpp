@@ -13,9 +13,9 @@ int main() {
 
 	/****************************** choose render type *******************************/
 	//const Application app{ 800, 600, REGULAR, std::move(modelPtr) };
-	const Application app{ 800, 600, SCANLINE, std::move(modelPtr) };
+	//const Application app{ 800, 600, SCANLINE, std::move(modelPtr) };
 	//const Application app{ 800, 600, NAIVE, std::move(modelPtr) };
-	//const Application app{ 800, 600, OCTREE, std::move(modelPtr) };
+	const Application app{ 800, 600, OCTREE, std::move(modelPtr) };
 
 	app.run();
 	return 0;

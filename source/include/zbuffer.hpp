@@ -7,6 +7,8 @@
 #include "frag_mesh.hpp"
 #include "Uniforms.hpp"
 
+class QuadTree;
+
 class ZBuffer {
 public:
 	ZBuffer() = default;
@@ -92,4 +94,9 @@ public:
 	void clear(glm::vec3 color) override;
 
 	void bufferResize(size_t w, size_t h, glm::vec3 color) override;
+
+	std::shared_ptr<QuadTree>& getQuadTreeRoot() { return QuadTreeRoot; }
+
+private:
+	std::shared_ptr<QuadTree> QuadTreeRoot{};
 };

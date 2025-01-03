@@ -1,5 +1,7 @@
 #include "zbuffer.hpp"
 
+#include "quad_tree.hpp"
+
 /**************************** ZBuffer *******************************/
 
 glm::u8vec3 ZBuffer::toU8Vec3(const glm::vec3& color) {
@@ -184,11 +186,16 @@ HierarchyZBuffer::HierarchyZBuffer(size_t width, size_t height)
 	: ZBuffer(width, height) {
 	depthPtr = std::make_unique<std::vector<float>>(width * height, 1.f);
 	pixelPtr = std::make_unique<std::vector<glm::u8vec3>>(width * height, glm::u8vec3(0));
+	QuadTreeRoot = std::make_shared<QuadTree>(
+		BBOX{ 0, 0,
+			 static_cast<int>(width),
+			 static_cast<int>(height) });
 }
 
 void HierarchyZBuffer::clear(glm::vec3 color) {
 	depthPtr->assign(width * height, 1.f);
 	pixelPtr->assign(width * height, toU8Vec3(color));
+	QuadTreeRoot->resetDepth();
 }
 
 void HierarchyZBuffer::bufferResize(size_t w, size_t h, glm::vec3 color) {

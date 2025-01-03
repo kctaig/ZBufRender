@@ -112,7 +112,7 @@ void Render::scanLineRender(const Shader& shader,
 
 void Render::naiveHierarchyRender(const Shader& shader,
 	const Uniforms& uniforms) const {
-	auto naiveHierarchyBufferPtr = std::dynamic_pointer_cast<HierarchyZBuffer>(bufferPtr);
+	bufferPtr->clear(glm::vec3(0.f));
 	const auto& vertices = modelPtr->getVertices();
 	const auto& triangles = modelPtr->getTriangles();
 	std::vector<glm::vec4> screenVertices;
@@ -122,22 +122,10 @@ void Render::naiveHierarchyRender(const Shader& shader,
 	// 对所有顶点进行变换
 	shader.getVertexShader()(screenVertices, uniforms);
 
-	// todo: 避免重复构建四叉树
-
-	// auto start = std::chrono::high_resolution_clock::now();
-	//  建立四叉树
-	std::shared_ptr<QuadTree> quadTreeRoot = std::make_shared<QuadTree>(
-		BBOX{ 0, 0,
-			static_cast<int>(bufferPtr->getWidth()),
-			static_cast<int>(bufferPtr->getHeight()) });
-
-	// auto end = std::chrono::high_resolution_clock::now();
-	// const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-	// std::cout << "construct quad_tree time: " << duration << " ms" << std::endl;
-
 	BBOX screenBBox({ 0, 0, static_cast<int>(bufferPtr->getWidth()),
 					 static_cast<int>(bufferPtr->getHeight()) });
 
+	auto naiveHierarchyBufferPtr = std::dynamic_pointer_cast<HierarchyZBuffer>(bufferPtr);
 	std::shared_ptr<FragMesh> fragMeshptr = std::make_shared<FragMesh>(3);
 	for (int i = 0; i < triangles.size(); ++i) {
 		const auto& tri = triangles[i];
@@ -150,13 +138,12 @@ void Render::naiveHierarchyRender(const Shader& shader,
 		shader.getFragmentShader()(*fragMeshptr, uniforms);
 		fragMeshptr->bbox = BBOX3d(fragMeshptr->v2d);
 		fragMeshptr->bbox.limitedToBBox(screenBBox);
-		quadTreeRoot->checkFragMesh(*fragMeshptr, shader, bufferPtr);
+		naiveHierarchyBufferPtr->getQuadTreeRoot()->checkFragMesh(*fragMeshptr, shader, bufferPtr);
 	}
 }
 
 void Render::octreeHierarchyRender(const Shader& shader,
 	const Uniforms& uniforms) const {
-	auto octreeHierarchyBufferPtr = std::dynamic_pointer_cast<HierarchyZBuffer>(bufferPtr);
 	const auto& vertices = modelPtr->getVertices();
 	const auto& triangles = modelPtr->getTriangles();
 	std::vector<glm::vec4> screenVertices;
@@ -188,15 +175,16 @@ void Render::octreeHierarchyRender(const Shader& shader,
 		minZ = std::min(minZ, fragMeshptr->bbox.minZ);
 		maxZ = std::max(maxZ, fragMeshptr->bbox.maxZ);
 	}
-	std::shared_ptr<QuadTree> quadTreeRoot = std::make_shared<QuadTree>(
-		BBOX{ 0, 0,
-			 static_cast<int>(bufferPtr->getWidth()),
-			 static_cast<int>(bufferPtr->getHeight()) });
-
+	auto start = std::chrono::high_resolution_clock::now();
+	bufferPtr->clear(glm::vec3(0.f));
 	std::shared_ptr<Octree> octreeRoot = std::make_shared<Octree>(
 		BBOX3d{ 0, 0, minZ,
 			   static_cast<int>(bufferPtr->getWidth()),
 			   static_cast<int>(bufferPtr->getHeight()), maxZ },
 		fragMeshesPtr);
-	quadTreeRoot->checkOctree(octreeRoot, shader, bufferPtr);
+	auto end = std::chrono::high_resolution_clock::now();
+	const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+	std::cout << "construct octree time: " << duration << " ms" << std::endl;
+	auto octreeHierarchyBufferPtr = std::dynamic_pointer_cast<HierarchyZBuffer>(bufferPtr);
+	octreeHierarchyBufferPtr->getQuadTreeRoot()->checkOctree(octreeRoot, shader, bufferPtr);
 }

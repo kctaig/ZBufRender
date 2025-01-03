@@ -12,6 +12,7 @@ Window::Window(const size_t& width, const size_t& height, const char* title)
 	context.firstMousePtr = &firstMouse;
 	context.deltaTimePtr = &deltaTime;
 	context.lastFramePtr = &lastFrame;
+	context.useMousePtr = &useMouse;
 }
 
 void Window::framebufferCallback(GLFWwindow* window, int width, int height) {
@@ -41,27 +42,31 @@ void Window::processInput(GLFWwindow* window)
 
 void Window::mouseCallback(GLFWwindow* window, double xPosIn, double yPosIn)
 {
-	const auto xPos = static_cast<float>(xPosIn);
-	const auto yPos = static_cast<float>(yPosIn);
-
-	if (*(context.firstMousePtr))
+	if (context.useMousePtr && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
 	{
+		const auto xPos = static_cast<float>(xPosIn);
+		const auto yPos = static_cast<float>(yPosIn);
+
+		if (*(context.firstMousePtr))
+		{
+			*(context.lastXPtr) = xPos;
+			*(context.lastYPtr) = yPos;
+			*(context.firstMousePtr) = false;
+		}
+
+		const float xOffset = *(context.lastXPtr) - xPos;
+		const float yOffset = yPos - *(context.lastYPtr); // reversed since y-coordinates go from bottom to top
+
 		*(context.lastXPtr) = xPos;
 		*(context.lastYPtr) = yPos;
-		*(context.firstMousePtr) = false;
+
+		context.cameraPtr->ProcessMouseMovement(xOffset, yOffset);
 	}
-
-	const float xOffset = *(context.lastXPtr) - xPos;
-	const float yOffset = yPos - *(context.lastYPtr); // reversed since y-coordinates go from bottom to top
-
-	*(context.lastXPtr) = xPos;
-	*(context.lastYPtr) = yPos;
-
-	context.cameraPtr->ProcessMouseMovement(xOffset, yOffset);
 }
 
 void Window::scrollCallback(GLFWwindow* window, double xOffset, double yOffset)
 {
+	if (!context.useMousePtr) return;
 	context.cameraPtr->ProcessMouseScroll(static_cast<float>(yOffset));
 }
 
@@ -80,7 +85,7 @@ void Window::init() {
 
 	glfwMakeContextCurrent(window.get());
 	glfwSetFramebufferSizeCallback(window.get(), framebufferCallback);
-	//glfwSetCursorPosCallback(window.get(), mouseCallback);
+	glfwSetCursorPosCallback(window.get(), mouseCallback);
 	glfwSetScrollCallback(window.get(), scrollCallback);
 
 	// tell GLFW to capture our mouse
