@@ -8,7 +8,7 @@ public:
 
 	~Octree() = default;
 
-	Octree(const BBOX3d& bbox, const std::vector<FragMesh>& fragMeshes);
+	Octree(const BBOX3d& bbox, const std::vector<std::shared_ptr<FragMesh>>& fragMeshesPtr);
 	void updateOctreeDepth();
 
 	float getDepth() const { return depth; }

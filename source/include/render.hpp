@@ -1,7 +1,7 @@
 #pragma once
 
-#include <omp.h>
 #include <iostream>
+#include <chrono>
 
 #include "zbuffer.hpp"
 #include "model.hpp"
@@ -10,10 +10,10 @@
 #include "octree.hpp"
 
 enum RasterType {
-    REGULAR,
-    SCANLINE,
-    NAIVE,
-    OCTREE
+	REGULAR,
+	SCANLINE,
+	NAIVE,
+	OCTREE
 };
 
 class Render {

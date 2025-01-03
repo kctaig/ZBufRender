@@ -1,13 +1,12 @@
 #include "octree.hpp"
+#include <numeric>
 
-Octree::Octree(const BBOX3d& bbox, const std::vector<FragMesh>& fragMeshes) {
+Octree::Octree(const BBOX3d& bbox, const std::vector<std::shared_ptr<FragMesh>>& fragMeshesPtr) {
 	bboxPtr = std::make_shared<BBOX3d>(bbox);
 	depth = bbox.minZ;
 
 	if (bbox.minX + 1 >= bbox.maxX || bbox.minY + 1 >= bbox.maxY) {
-		for (const auto& fragMesh : fragMeshes) {
-			fragMeshesPtr.push_back(std::make_shared<FragMesh>(fragMesh));
-		}
+		this->fragMeshesPtr = fragMeshesPtr;
 		return;
 	}
 
@@ -24,18 +23,18 @@ Octree::Octree(const BBOX3d& bbox, const std::vector<FragMesh>& fragMeshes) {
 	BBOX3d leftUpBackBBox{ bbox.minX, midY, midZ, midX, bbox.maxY, bbox.maxZ };
 	BBOX3d rightUpBackBBox{ midX, midY, midZ, bbox.maxX, bbox.maxY, bbox.maxZ };
 
-	std::vector<std::vector<FragMesh>> childrenFragMeshes(8);
-	for (const auto& fragMesh : fragMeshes) {
-		auto fragMeshBBox = fragMesh.bbox;
-		if (leftDownFrontBBox.containBBox3d(fragMeshBBox)) childrenFragMeshes[0].push_back(fragMesh);
-		else if (rightDownFrontBBox.containBBox3d(fragMeshBBox)) childrenFragMeshes[1].push_back(fragMesh);
-		else if (leftUpFrontBBox.containBBox3d(fragMeshBBox)) childrenFragMeshes[2].push_back(fragMesh);
-		else if (rightUpFrontBBox.containBBox3d(fragMeshBBox)) childrenFragMeshes[3].push_back(fragMesh);
-		else if (leftDownBackBBox.containBBox3d(fragMeshBBox)) childrenFragMeshes[4].push_back(fragMesh);
-		else if (rightDownBackBBox.containBBox3d(fragMeshBBox)) childrenFragMeshes[5].push_back(fragMesh);
-		else if (leftUpBackBBox.containBBox3d(fragMeshBBox)) childrenFragMeshes[6].push_back(fragMesh);
-		else if (rightUpBackBBox.containBBox3d(fragMeshBBox)) childrenFragMeshes[7].push_back(fragMesh);
-		else fragMeshesPtr.push_back(std::make_shared<FragMesh>(fragMesh));
+	std::vector<std::vector<std::shared_ptr<FragMesh>>> childrenFragMeshes(8);
+	for (const auto& fragMeshPtr : fragMeshesPtr) {
+		auto fragMeshBBox = fragMeshPtr->bbox;
+		if (leftDownFrontBBox.containBBox3d(fragMeshBBox)) childrenFragMeshes[0].push_back(fragMeshPtr);
+		else if (rightDownFrontBBox.containBBox3d(fragMeshBBox)) childrenFragMeshes[1].push_back(fragMeshPtr);
+		else if (leftUpFrontBBox.containBBox3d(fragMeshBBox)) childrenFragMeshes[2].push_back(fragMeshPtr);
+		else if (rightUpFrontBBox.containBBox3d(fragMeshBBox)) childrenFragMeshes[3].push_back(fragMeshPtr);
+		else if (leftDownBackBBox.containBBox3d(fragMeshBBox)) childrenFragMeshes[4].push_back(fragMeshPtr);
+		else if (rightDownBackBBox.containBBox3d(fragMeshBBox)) childrenFragMeshes[5].push_back(fragMeshPtr);
+		else if (leftUpBackBBox.containBBox3d(fragMeshBBox)) childrenFragMeshes[6].push_back(fragMeshPtr);
+		else if (rightUpBackBBox.containBBox3d(fragMeshBBox)) childrenFragMeshes[7].push_back(fragMeshPtr);
+		else this->fragMeshesPtr.push_back(fragMeshPtr);
 	}
 
 	if (!childrenFragMeshes[0].empty())
@@ -61,10 +60,8 @@ Octree::Octree(const BBOX3d& bbox, const std::vector<FragMesh>& fragMeshes) {
 void Octree::updateOctreeDepth() {
 	if (children.empty())
 		return;
-
-	float tempDepth = FLT_MAX;
-	for (auto& child : children) {
-		tempDepth = std::min(tempDepth, child->depth);
-	}
-	depth = tempDepth;
+	depth = std::accumulate(children.begin(), children.end(), FLT_MAX,
+		[](float acc, const std::shared_ptr<Octree>& child) {
+			return std::min(acc, child->depth);
+		});
 }
