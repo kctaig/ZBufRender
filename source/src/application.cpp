@@ -26,6 +26,7 @@ void Application::run() const {
 			renderPtr->getBufferPtr()->getHeight());
 
 		/************************** render ***************************/
+		renderPtr->initFragMeshesPtr(*uniformsPtr, *shaderPtr);
 		if (renderPtr->getRasterType() == REGULAR)
 			renderPtr->regularRender(*uniformsPtr, *shaderPtr);
 		else if (renderPtr->getRasterType() == SCANLINE)

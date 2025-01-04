@@ -1,5 +1,50 @@
 #include "render.hpp"
 
+Render::Render(std::unique_ptr<Model> mPtr,
+	std::shared_ptr<Camera> cPtr,
+	std::shared_ptr<ZBuffer> fbPtr,
+	RasterType type) {
+	modelPtr = std::move(mPtr);
+	cameraPtr = cPtr;
+	bufferPtr = fbPtr;
+	rasterType = type;
+}
+
+void Render::initFragMeshesPtr(const Uniforms& uniforms, const Shader& shader)
+{
+	auto start = std::chrono::high_resolution_clock::now();
+	const auto& vertices = modelPtr->getVertices();
+	const auto& triangles = modelPtr->getTriangles();
+	std::vector<glm::vec4> screenVertices;
+	for (const Vertex& vertex : vertices) {
+		screenVertices.emplace_back(vertex.pos, 1.0);
+	}
+	shader.getVertexShader()(screenVertices, uniforms);
+
+	BBOX screenBBox({ 0, 0, static_cast<int>(bufferPtr->getWidth()),
+					 static_cast<int>(bufferPtr->getHeight()) });
+
+	float minZ = FLT_MAX, maxZ = FLT_MIN;
+	for (const Mesh& tri : triangles) {
+		std::shared_ptr<FragMesh> fragMeshptr = std::make_shared<FragMesh>(3);
+		size_t vertexIndex = 0;
+		for (const size_t& index : tri.indices) {
+			fragMeshptr->v3d[vertexIndex] = vertices[index].pos;
+			fragMeshptr->v2d[vertexIndex] = screenVertices[index];
+			vertexIndex++;
+		}
+		shader.getFragmentShader()(*fragMeshptr, uniforms);
+		fragMeshptr->bbox = BBOX3d(fragMeshptr->v2d);
+		fragMeshptr->bbox.limitedToBBox(screenBBox);
+		getFragMeshesPtr().push_back(fragMeshptr);
+		minZ = std::min(minZ, fragMeshptr->bbox.minZ);
+		maxZ = std::max(maxZ, fragMeshptr->bbox.maxZ);
+	}
+	auto end = std::chrono::high_resolution_clock::now();
+	const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+	std::cout << "FragMesh Construct Time : " << duration << " ms" << std::endl;
+}
+
 void Render::regularRender(const Uniforms& uniforms,
 	const Shader& shader) const {
 	const auto& vertices = modelPtr->getVertices();
@@ -154,9 +199,8 @@ void Render::octreeHierarchyRender(const Shader& shader,
 	const auto& vertices = modelPtr->getVertices();
 	const auto& triangles = modelPtr->getTriangles();
 	std::vector<glm::vec4> screenVertices;
-
 	for (const Vertex& vertex : vertices) {
-		screenVertices.push_back(glm::vec4(vertex.pos, 1.0));
+		screenVertices.emplace_back(vertex.pos, 1.0);
 	}
 	shader.getVertexShader()(screenVertices, uniforms);
 

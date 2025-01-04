@@ -19,17 +19,11 @@ enum RasterType {
 class Render {
 public:
 	Render() = default;
-
 	~Render() = default;
-	Render(std::unique_ptr<Model> mPtr,
-		std::shared_ptr<Camera> cPtr,
-		std::shared_ptr<ZBuffer> fbPtr,
-		RasterType type) {
-		modelPtr = std::move(mPtr);
-		cameraPtr = cPtr;
-		bufferPtr = fbPtr;
-		rasterType = type;
-	}
+
+	Render(std::unique_ptr<Model> mPtr, std::shared_ptr<Camera> cPtr, std::shared_ptr<ZBuffer> fbPtr, RasterType type);
+
+	void initFragMeshesPtr(const Uniforms& uniforms, const Shader& shader);
 
 	void regularRender(const Uniforms& uniforms,
 		const Shader& shader) const;
@@ -48,8 +42,12 @@ public:
 	auto getModelPtr() const { return modelPtr.get(); }
 	auto getRasterType() const { return rasterType; }
 
+	auto& getFragMeshesPtr() { return fragMeshesPtr; }
+	auto getFragMeshesPtr() const { return fragMeshesPtr; }
+
 private:
 	std::unique_ptr<Model> modelPtr;
+	std::vector<std::shared_ptr<FragMesh>> fragMeshesPtr = {};
 	std::shared_ptr<Camera> cameraPtr;
 	std::shared_ptr<ZBuffer> bufferPtr;
 	RasterType rasterType;
