@@ -42,9 +42,6 @@ public:
 	auto getModelPtr() const { return modelPtr.get(); }
 	auto getRasterType() const { return rasterType; }
 
-	auto& getFragMeshesPtr() { return fragMeshesPtr; }
-	auto getFragMeshesPtr() const { return fragMeshesPtr; }
-
 private:
 	std::unique_ptr<Model> modelPtr;
 	std::vector<std::shared_ptr<FragMesh>> fragMeshesPtr = {};

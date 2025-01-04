@@ -15,6 +15,9 @@ struct FragMesh {
 	FragMesh() = default;
 
 	FragMesh(size_t vertexNum);
+	FragMesh(const std::vector<glm::vec3>& vertices3D, const std::vector<glm::vec4>& vertices2D)
+		:v2d(vertices2D), v3d(vertices3D), vertexNum(vertices3D.size()) {
+	}
 
 	glm::vec3 calculateV2dNormal() const;
 	glm::vec3 calculateV3dNormal() const;

@@ -1,9 +1,6 @@
 #include "render.hpp"
 
-Render::Render(std::unique_ptr<Model> mPtr,
-	std::shared_ptr<Camera> cPtr,
-	std::shared_ptr<ZBuffer> fbPtr,
-	RasterType type) {
+Render::Render(std::unique_ptr<Model> mPtr, std::shared_ptr<Camera> cPtr, std::shared_ptr<ZBuffer> fbPtr, RasterType type) {
 	modelPtr = std::move(mPtr);
 	cameraPtr = cPtr;
 	bufferPtr = fbPtr;
@@ -13,6 +10,7 @@ Render::Render(std::unique_ptr<Model> mPtr,
 void Render::initFragMeshesPtr(const Uniforms& uniforms, const Shader& shader)
 {
 	auto start = std::chrono::high_resolution_clock::now();
+	this->fragMeshesPtr.clear();
 	const auto& vertices = modelPtr->getVertices();
 	const auto& triangles = modelPtr->getTriangles();
 	std::vector<glm::vec4> screenVertices;
@@ -20,25 +18,18 @@ void Render::initFragMeshesPtr(const Uniforms& uniforms, const Shader& shader)
 		screenVertices.emplace_back(vertex.pos, 1.0);
 	}
 	shader.getVertexShader()(screenVertices, uniforms);
-
 	BBOX screenBBox({ 0, 0, static_cast<int>(bufferPtr->getWidth()),
 					 static_cast<int>(bufferPtr->getHeight()) });
-
-	float minZ = FLT_MAX, maxZ = FLT_MIN;
 	for (const Mesh& tri : triangles) {
 		std::shared_ptr<FragMesh> fragMeshptr = std::make_shared<FragMesh>(3);
-		size_t vertexIndex = 0;
-		for (const size_t& index : tri.indices) {
-			fragMeshptr->v3d[vertexIndex] = vertices[index].pos;
-			fragMeshptr->v2d[vertexIndex] = screenVertices[index];
-			vertexIndex++;
+		for (auto it = tri.indices.begin(); it != tri.indices.end(); ++it) {
+			fragMeshptr->v3d[it - tri.indices.begin()] = vertices[*it].pos;
+			fragMeshptr->v2d[it - tri.indices.begin()] = screenVertices[*it];
 		}
-		shader.getFragmentShader()(*fragMeshptr, uniforms);
 		fragMeshptr->bbox = BBOX3d(fragMeshptr->v2d);
 		fragMeshptr->bbox.limitedToBBox(screenBBox);
-		getFragMeshesPtr().push_back(fragMeshptr);
-		minZ = std::min(minZ, fragMeshptr->bbox.minZ);
-		maxZ = std::max(maxZ, fragMeshptr->bbox.maxZ);
+		shader.getFragmentShader()(*fragMeshptr, uniforms);
+		this->fragMeshesPtr.push_back(fragMeshptr);
 	}
 	auto end = std::chrono::high_resolution_clock::now();
 	const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
@@ -47,41 +38,17 @@ void Render::initFragMeshesPtr(const Uniforms& uniforms, const Shader& shader)
 
 void Render::regularRender(const Uniforms& uniforms,
 	const Shader& shader) const {
-	const auto& vertices = modelPtr->getVertices();
-	const auto& triangles = modelPtr->getTriangles();
-	std::vector<glm::vec4> screenVertices;
-	for (const Vertex& vertex : vertices) {
-		screenVertices.push_back(glm::vec4(vertex.pos, 1.0));
-	}
-	// 对所有顶点进行变换
-	shader.getVertexShader()(screenVertices, uniforms);
-
-	BBOX screenBBox{ 0, 0, static_cast<int>(bufferPtr->getWidth()),
-					static_cast<int>(bufferPtr->getHeight()) };
-
-	std::shared_ptr<FragMesh> fragMeshptr = std::make_shared<FragMesh>(3);
-
+	bufferPtr->clear({ 0.f, 0.f, 0.f });
 	auto start = std::chrono::high_resolution_clock::now();
-	for (int i = 0; i < triangles.size(); ++i) {
-		const auto& tri = triangles[i];
-		size_t vertexIndex = 0;
-		for (const auto& index : tri.indices) {
-			fragMeshptr->v3d[vertexIndex] = vertices[index].pos;
-			fragMeshptr->v2d[vertexIndex] = screenVertices[index];
-			vertexIndex++;
-		}
-		shader.getFragmentShader()(*fragMeshptr, uniforms);
-
-		BBOX bbox(fragMeshptr->v2d);
-		bbox.limitedToBBox(screenBBox);
+	for (auto& fragMeshPtr : fragMeshesPtr) {
+		const BBOX& bbox = fragMeshPtr->bbox;
 		for (int x = bbox.minX; x < bbox.maxX; x++) {
 			for (int y = bbox.minY; y < bbox.maxY; y++) {
-				auto depth = shader.calculateDepth({ x, y }, *fragMeshptr);
+				auto depth = shader.calculateDepth({ x, y }, *fragMeshPtr);
 				if (depth > bufferPtr->getDepth(x, y)) {
 					continue;
 				}
-				// fragment shader
-				bufferPtr->setPixel(x, y, fragMeshptr->color);
+				bufferPtr->setPixel(x, y, fragMeshPtr->color);
 				bufferPtr->setDepth(x, y, depth);
 			}
 		}
@@ -94,30 +61,9 @@ void Render::regularRender(const Uniforms& uniforms,
 void Render::scanLineRender(const Shader& shader,
 	const Uniforms& uniforms) const {
 	auto scanLineBufferPtr = std::dynamic_pointer_cast<ScanLineZBuffer>(bufferPtr);
-
-	const auto& vertices = modelPtr->getVertices();
-	const auto& triangles = modelPtr->getTriangles();
-	std::vector<glm::vec4> screenVertices;
-	for (const Vertex& vertex : vertices) {
-		screenVertices.push_back(glm::vec4(vertex.pos, 1.0));
-	}
-	// 对所有顶点进行变换
-	shader.getVertexShader()(screenVertices, uniforms);
-
 	auto start = std::chrono::high_resolution_clock::now();
-	std::shared_ptr<FragMesh> fragMeshptr = std::make_shared<FragMesh>(3);
-	for (int i = 0; i < triangles.size(); ++i) {
-		const auto& tri = triangles[i];
-		size_t vertexIndex = 0;
-		for (const auto& index : tri.indices) {
-			fragMeshptr->v3d[vertexIndex] = vertices[index].pos;
-			fragMeshptr->v2d[vertexIndex] = screenVertices[index];
-			vertexIndex++;
-		}
-		shader.getFragmentShader()(*fragMeshptr, uniforms);
-
-		// construct CPTNOde
-		scanLineBufferPtr->fragMeshToCPT(*fragMeshptr, i);
+	for (auto it = fragMeshesPtr.begin(); it != fragMeshesPtr.end(); it++) {
+		scanLineBufferPtr->fragMeshToCPT(**it, it - fragMeshesPtr.begin());
 	}
 	auto end = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
@@ -160,33 +106,10 @@ void Render::scanLineRender(const Shader& shader,
 void Render::naiveHierarchyRender(const Shader& shader,
 	const Uniforms& uniforms) const {
 	bufferPtr->clear(glm::vec3(0.f));
-	const auto& vertices = modelPtr->getVertices();
-	const auto& triangles = modelPtr->getTriangles();
-	std::vector<glm::vec4> screenVertices;
-	for (const Vertex& vertex : vertices) {
-		screenVertices.push_back(glm::vec4(vertex.pos, 1.0));
-	}
-	// 对所有顶点进行变换
-	shader.getVertexShader()(screenVertices, uniforms);
-
-	BBOX screenBBox({ 0, 0, static_cast<int>(bufferPtr->getWidth()),
-					 static_cast<int>(bufferPtr->getHeight()) });
-
 	auto naiveHierarchyBufferPtr = std::dynamic_pointer_cast<HierarchyZBuffer>(bufferPtr);
-	std::shared_ptr<FragMesh> fragMeshptr = std::make_shared<FragMesh>(3);
 	auto start = std::chrono::high_resolution_clock::now();
-	for (int i = 0; i < triangles.size(); ++i) {
-		const auto& tri = triangles[i];
-		size_t vertexIndex = 0;
-		for (const auto& index : tri.indices) {
-			fragMeshptr->v3d[vertexIndex] = vertices[index].pos;
-			fragMeshptr->v2d[vertexIndex] = screenVertices[index];
-			vertexIndex++;
-		}
-		shader.getFragmentShader()(*fragMeshptr, uniforms);
-		fragMeshptr->bbox = BBOX3d(fragMeshptr->v2d);
-		fragMeshptr->bbox.limitedToBBox(screenBBox);
-		naiveHierarchyBufferPtr->getQuadTreeRoot()->checkFragMesh(*fragMeshptr, shader, bufferPtr);
+	for (auto& fragMeshPtr : fragMeshesPtr) {
+		naiveHierarchyBufferPtr->getQuadTreeRoot()->checkFragMesh(*fragMeshPtr, shader, bufferPtr);
 	}
 	auto end = std::chrono::high_resolution_clock::now();
 	const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
@@ -196,54 +119,25 @@ void Render::naiveHierarchyRender(const Shader& shader,
 void Render::octreeHierarchyRender(const Shader& shader,
 	const Uniforms& uniforms) const {
 	bufferPtr->clear(glm::vec3(0.f));
-	const auto& vertices = modelPtr->getVertices();
-	const auto& triangles = modelPtr->getTriangles();
-	std::vector<glm::vec4> screenVertices;
-	for (const Vertex& vertex : vertices) {
-		screenVertices.emplace_back(vertex.pos, 1.0);
-	}
-	shader.getVertexShader()(screenVertices, uniforms);
-
-	BBOX screenBBox({ 0, 0, static_cast<int>(bufferPtr->getWidth()),
-					 static_cast<int>(bufferPtr->getHeight()) });
-
-	std::vector<std::shared_ptr<FragMesh>> fragMeshesPtr;
-
-	float minZ = FLT_MAX, maxZ = FLT_MIN;
-	for (int i = 0; i < triangles.size(); ++i) {
-		const auto& tri = triangles[i];
-		std::shared_ptr<FragMesh> fragMeshptr = std::make_shared<FragMesh>(3);
-		size_t vertexIndex = 0;
-		for (const auto& index : tri.indices) {
-			fragMeshptr->v3d[vertexIndex] = vertices[index].pos;
-			fragMeshptr->v2d[vertexIndex] = screenVertices[index];
-			vertexIndex++;
-		}
-		shader.getFragmentShader()(*fragMeshptr, uniforms);
-		fragMeshptr->bbox = BBOX3d(fragMeshptr->v2d);
-		fragMeshptr->bbox.limitedToBBox(screenBBox);
-		fragMeshesPtr.push_back(fragMeshptr);
-		minZ = std::min(minZ, fragMeshptr->bbox.minZ);
-		maxZ = std::max(maxZ, fragMeshptr->bbox.maxZ);
-	}
-
 	auto octreeHierarchyBufferPtr = std::dynamic_pointer_cast<HierarchyZBuffer>(bufferPtr);
-
-	auto start = std::chrono::high_resolution_clock::now();
+	float minZ = FLT_MAX, maxZ = FLT_MIN;
+	for (auto& fragMeshPtr : fragMeshesPtr) {
+		minZ = std::min(minZ, fragMeshPtr->bbox.minZ);
+		maxZ = std::max(maxZ, fragMeshPtr->bbox.maxZ);
+	}
+	auto construct = std::chrono::high_resolution_clock::now();
 	// construct octree
 	std::shared_ptr<Octree> octreeRoot = std::make_shared<Octree>(
 		BBOX3d{ 0, 0, minZ,
 			   static_cast<int>(bufferPtr->getWidth()),
 			   static_cast<int>(bufferPtr->getHeight()), maxZ },
 		fragMeshesPtr);
-
-	auto end1 = std::chrono::high_resolution_clock::now();
+	auto start = std::chrono::high_resolution_clock::now();
 	// check octree
 	octreeHierarchyBufferPtr->getQuadTreeRoot()->checkOctree(octreeRoot, shader, bufferPtr);
-	auto end2 = std::chrono::high_resolution_clock::now();
-
-	const auto duration1 = std::chrono::duration_cast<std::chrono::milliseconds>(end1 - start).count();
-	const auto duration2 = std::chrono::duration_cast<std::chrono::milliseconds>(end2 - end1).count();
+	auto end = std::chrono::high_resolution_clock::now();
+	const auto duration1 = std::chrono::duration_cast<std::chrono::milliseconds>(start - construct).count();
+	const auto duration2 = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 	std::cout << "Octree Hierarchy ZBuffer Construct Time : " << duration1 << " ms" << std::endl;
 	std::cout << "Rendering Time : " << duration2 << " ms" << std::endl;
 }

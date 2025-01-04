@@ -17,7 +17,7 @@ void Application::run() const {
 		Window::processInput(windowPtr->getWindowPtr());
 
 		// rotate
-		//angle += angularSpeed * windowPtr->deltaTime;
+		angle += angularSpeed * windowPtr->deltaTime;
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::rotate(model, glm::radians(angle), rotationAxis);
 		uniformsPtr->updateModel(model);
@@ -49,6 +49,7 @@ void Application::run() const {
 		// glfwSwapInterval(1);
 		glfwSwapBuffers(windowPtr->getWindowPtr());
 		glfwPollEvents();
+		//break;
 	}
 	glfwTerminate();
 }
