@@ -5,7 +5,7 @@ Octree::Octree(const BBOX3d& bbox, const std::vector<std::shared_ptr<FragMesh>>&
 	bboxPtr = std::make_shared<BBOX3d>(bbox);
 	depth = bbox.minZ;
 
-	if (bbox.minX + 1 >= bbox.maxX || bbox.minY + 1 >= bbox.maxY) {
+	if (fragMeshesPtr.size() <= 1 || bbox.minX + 1 >= bbox.maxX || bbox.minY + 1 >= bbox.maxY) {
 		this->fragMeshesPtr = fragMeshesPtr;
 		return;
 	}

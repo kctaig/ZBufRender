@@ -21,7 +21,7 @@ Model::Model(std::string dirPath, std::string fileName) {
 
 	auto& attrib = reader.GetAttrib();
 	auto& shapes = reader.GetShapes();
-	auto& materials = reader.GetMaterials();
+	//auto& materials = reader.GetMaterials();
 
 	// add model vertices
 	for (size_t i = 0; i < attrib.vertices.size(); i += 3) {
@@ -42,12 +42,12 @@ Model::Model(std::string dirPath, std::string fileName) {
 			for (size_t v = 0; v < each_mesh_vertex_num; v++) {
 				idx = shape.mesh.indices[mesh_vertex_offset + v];
 				mesh->indices[v] = idx.vertex_index;  // 面片的的顶点索引
-				if (idx.normal_index >= 0 && idx.normal_index < this->vertices.size()) {
-					tinyobj::real_t nx = attrib.normals[3 * size_t(idx.normal_index) + 0];
-					tinyobj::real_t ny = attrib.normals[3 * size_t(idx.normal_index) + 1];
-					tinyobj::real_t nz = attrib.normals[3 * size_t(idx.normal_index) + 2];
-					this->vertices[idx.normal_index].normal = glm::vec3(nx, ny, nz);  // 添加法向量
-				}
+				//if (idx.normal_index >= 0 && idx.normal_index < this->vertices.size()) {
+				//	tinyobj::real_t nx = attrib.normals[3 * size_t(idx.normal_index) + 0];
+				//	tinyobj::real_t ny = attrib.normals[3 * size_t(idx.normal_index) + 1];
+				//	tinyobj::real_t nz = attrib.normals[3 * size_t(idx.normal_index) + 2];
+				//	this->vertices[idx.normal_index].normal = glm::vec3(nx, ny, nz);  // 添加法向量
+				//}
 			}
 			this->triangles.push_back(*mesh);
 			mesh_vertex_offset += each_mesh_vertex_num;

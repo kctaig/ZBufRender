@@ -6,9 +6,8 @@ void Application::run() const {
 	float angle = 0.0f;
 	float angularSpeed = 20.0f;  // 每秒旋转20度
 	glm::vec3 rotationAxis = glm::vec3(0.0f, 1.0f, 0.0f); // 绕y轴旋转
-
+	bool newScene = true;
 	while (!glfwWindowShouldClose(windowPtr->getWindowPtr())) {
-		renderPtr->getBufferPtr()->clear(glm::vec3(0));
 		const auto curFrame = static_cast<float>(glfwGetTime());
 		windowPtr->deltaTime = curFrame - windowPtr->lastFrame;
 		windowPtr->lastFrame = curFrame;
@@ -26,7 +25,12 @@ void Application::run() const {
 			renderPtr->getBufferPtr()->getHeight());
 
 		/************************** render ***************************/
-		renderPtr->initFragMeshesPtr(*uniformsPtr, *shaderPtr);
+		if (newScene) {
+			renderPtr->initFragMeshesPtr(*uniformsPtr, *shaderPtr);
+			//newScene = false;
+		}
+
+		renderPtr->getBufferPtr()->clear(glm::vec3(0));
 		if (renderPtr->getRasterType() == REGULAR)
 			renderPtr->regularRender(*uniformsPtr, *shaderPtr);
 		else if (renderPtr->getRasterType() == SCANLINE)
@@ -55,7 +59,7 @@ void Application::run() const {
 }
 
 void Application::init(size_t width, size_t height, RasterType rasterType, std::unique_ptr<Model> modelPtr) {
-	auto cameraPtr = std::make_shared<Camera>(glm::vec3(0.0f, 0.f, 6.0f));
+	auto cameraPtr = std::make_shared<Camera>(glm::vec3(0.0f, 0.f, 3.f));
 	std::shared_ptr<ZBuffer> bufferPtr;
 	if (rasterType == REGULAR) {
 		bufferPtr = std::make_shared<RegularZBuffer>(width, height);
