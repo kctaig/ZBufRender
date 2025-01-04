@@ -63,7 +63,7 @@ void Render::scanLineRender(const Shader& shader,
 	auto scanLineBufferPtr = std::dynamic_pointer_cast<ScanLineZBuffer>(bufferPtr);
 	auto start = std::chrono::high_resolution_clock::now();
 	for (auto it = fragMeshesPtr.begin(); it != fragMeshesPtr.end(); it++) {
-		scanLineBufferPtr->fragMeshToCPT(**it, it - fragMeshesPtr.begin());
+		scanLineBufferPtr->fragMeshToCPT(**it, static_cast<int>(it - fragMeshesPtr.begin()));
 	}
 	auto end = std::chrono::high_resolution_clock::now();
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
@@ -139,5 +139,5 @@ void Render::octreeHierarchyRender(const Shader& shader,
 	const auto duration1 = std::chrono::duration_cast<std::chrono::milliseconds>(start - construct).count();
 	const auto duration2 = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 	std::cout << "Octree Hierarchy ZBuffer Construct Time : " << duration1 << " ms" << std::endl;
-	std::cout << "Rendering Time : " << duration2 << " ms" << std::endl;
+	std::cout << "Octree Hierarchy ZBuffer Rendering Time : " << duration2 << " ms" << std::endl;
 }

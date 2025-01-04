@@ -12,8 +12,8 @@
 enum RasterType {
 	REGULAR,
 	SCANLINE,
-	NAIVE,
-	OCTREE
+	NAIVEHIZ,
+	OCTREEHIZ
 };
 
 class Render {

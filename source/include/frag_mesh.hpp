@@ -5,11 +5,12 @@
 
 #include "bbox.hpp"
 
-struct FragMesh {
+class FragMesh {
+public:
 	std::vector<glm::vec4> v2d;
 	std::vector<glm::vec3> v3d;
 	size_t vertexNum = 3;
-	BBOX3d bbox = { 0, 0, 0, 0, 0, 0 };
+	BBOX3d bbox = { 0, 0, 0.f, 0, 0, 0.f };
 	glm::vec3 color = { 1.f, 1.f, 1.f };
 
 	FragMesh() = default;

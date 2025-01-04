@@ -37,7 +37,6 @@ void RegularZBuffer::bufferResize(size_t w, size_t h, glm::vec3 color) {
 
 ScanLineZBuffer::ScanLineZBuffer(size_t width, size_t height)
 	: ZBuffer(width, height) {
-	int pixelcount = width * height;
 	depthPtr = std::make_unique<std::vector<float>>(width, 1.f);
 	pixelPtr = std::make_unique<std::vector<glm::u8vec3>>(width * height, glm::u8vec3(0));
 	cptPtr = std::make_unique<std::vector<std::vector<CPTNode>>>(height);
