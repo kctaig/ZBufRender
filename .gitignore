@@ -8,3 +8,4 @@ cmake-build-debug-visual-studio
 cmake-build-release-visual-studio
 build
 out
+/CMakeSettings.json

@@ -1,12 +1,11 @@
 #include "application.hpp"
 
 void Application::run() const {
-	// render loop
-
 	float angle = 0.0f;
 	float angularSpeed = 20.0f;  // 每秒旋转20度
 	glm::vec3 rotationAxis = glm::vec3(0.0f, 1.0f, 0.0f); // 绕y轴旋转
 	bool newScene = true;
+	// render loop
 	while (!glfwWindowShouldClose(windowPtr->getWindowPtr())) {
 		const auto curFrame = static_cast<float>(glfwGetTime());
 		windowPtr->deltaTime = curFrame - windowPtr->lastFrame;
@@ -59,7 +58,7 @@ void Application::run() const {
 }
 
 void Application::init(size_t width, size_t height, RasterType rasterType, std::unique_ptr<Model> modelPtr) {
-	auto cameraPtr = std::make_shared<Camera>(glm::vec3(0.0f, 0.f, 3.f));
+	auto cameraPtr = std::make_shared<Camera>(glm::vec3(0.0f, 0.f, 6.5f));
 	std::shared_ptr<ZBuffer> bufferPtr;
 	if (rasterType == REGULAR) {
 		bufferPtr = std::make_shared<RegularZBuffer>(width, height);
