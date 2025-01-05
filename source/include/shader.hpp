@@ -12,15 +12,12 @@ public:
 
 	~Shader() = default;
 
-	using vertexShader = void (*)(std::vector<glm::vec4>&, const Uniforms&);
-	using fragmentShader = void (*)(FragMesh&, const Uniforms&);
+	using VertexShader = void (*)(std::vector<glm::vec4>&, const Uniforms&);
+	using FragmentShader = void (*)(FragMesh&, const Uniforms&);
 
-	Shader(const vertexShader& vs, const fragmentShader& fs)
-		: vs(vs), fs(fs) {
+	Shader(const VertexShader& vs, const FragmentShader& fs)
+		: vertexShader(vs), fragmentShader(fs) {
 	}
-
-	vertexShader getVertexShader() const { return vs; }
-	fragmentShader getFragmentShader() const { return fs; }
 
 	float calculateDepth(glm::ivec2 pixel,
 		const FragMesh& fragMesh) const;
@@ -30,11 +27,10 @@ public:
 
 	static constexpr float EPSILON = std::numeric_limits<float>::epsilon();
 
-private:
-	vertexShader vs;
-	fragmentShader fs;
+	static void vs(std::vector<glm::vec4>& vertices, const Uniforms& uniforms);
+
+	static void fs(FragMesh& fragMesh, const Uniforms& uniforms);
+
+	VertexShader vertexShader;
+	FragmentShader fragmentShader;
 };
-
-void vertexShader(std::vector<glm::vec4>& vertices, const Uniforms& uniforms);
-
-void fragmentShader(FragMesh& fragMesh, const Uniforms& uniforms);

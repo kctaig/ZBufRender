@@ -18,7 +18,8 @@ void Render::initFragMeshesPtr(const Uniforms& uniforms, const Shader& shader)
 	for (const Vertex& vertex : vertices) {
 		screenVertices.emplace_back(vertex.pos, 1.0);
 	}
-	shader.getVertexShader()(screenVertices, uniforms);
+	//shader.getVertexShader()(screenVertices, uniforms);
+	shader.vertexShader(screenVertices, uniforms);
 	BBOX screenBBox({ 0, 0, static_cast<int>(bufferPtr->getWidth()),
 					 static_cast<int>(bufferPtr->getHeight()) });
 	for (const Mesh& tri : triangles) {
@@ -29,7 +30,7 @@ void Render::initFragMeshesPtr(const Uniforms& uniforms, const Shader& shader)
 		}
 		fragMeshptr->bbox = BBOX3d(fragMeshptr->v2d);
 		fragMeshptr->bbox.limitedToBBox(screenBBox);
-		shader.getFragmentShader()(*fragMeshptr, uniforms);
+		shader.fragmentShader(*fragMeshptr, uniforms);
 		this->fragMeshesPtr.push_back(fragMeshptr);
 	}
 	auto end = std::chrono::high_resolution_clock::now();
@@ -132,7 +133,7 @@ void Render::octreeHierarchyRender(const Shader& shader,
 		BBOX3d{ 0, 0, minZ,
 			   static_cast<int>(bufferPtr->getWidth()),
 			   static_cast<int>(bufferPtr->getHeight()), maxZ },
-		fragMeshesPtr);
+		fragMeshesPtr, 0);
 	auto start = std::chrono::high_resolution_clock::now();
 	// check octree
 	octreeHierarchyBufferPtr->getQuadTreeRoot()->checkOctree(octreeRoot, shader, bufferPtr);
@@ -160,36 +161,27 @@ void Render::kdTreeHierarchyRender(const Shader& shader, const Uniforms& uniform
 
 	auto construct = std::chrono::high_resolution_clock::now();
 
-	//construct KDTree
-
-	//std::shared_ptr<KDTree> kdTreeRoot = std::make_shared<KDTree>(
-	//	BBOX3d{ 0, 0, minZ,
-	//		   static_cast<int>(bufferPtr->getWidth()),
-	//		   static_cast<int>(bufferPtr->getHeight()), maxZ },
-	//	fragMeshesPtr, 0);
-
 	std::shared_ptr<KDTree> kdTreeRoot = std::make_shared<KDTree>(BBOX3d{ minX, minY, minZ, maxX, maxY, maxZ }, fragMeshesPtr, 0);
 
 	auto start = std::chrono::high_resolution_clock::now();
 
-	// check KDTree
-	//kdTreeHierarchyBufferPtr->getQuadTreeRoot()->checkKDTree(kdTreeRoot, shader, bufferPtr);
+	//std::stack<std::shared_ptr<QuadTree>> quadTreeStack;
+	//quadTreeStack.push(kdTreeHierarchyBufferPtr->getQuadTreeRoot());
+	//while (!quadTreeStack.empty()) {
+	//	auto quadTree = quadTreeStack.top();
+	//	quadTreeStack.pop();
+	//	if (quadTree->containKDTree(kdTreeRoot)) {
+	//		quadTree->checkKDTree(kdTreeRoot, shader, bufferPtr);
+	//		for (int i = 0; i < 4; i++) {
+	//			auto child = quadTree->getChildren(i);
+	//			if (child) {
+	//				quadTreeStack.push(child);
+	//			}
+	//		}
+	//	}
+	//}
 
-	std::stack<std::shared_ptr<QuadTree>> quadTreeStack;
-	quadTreeStack.push(kdTreeHierarchyBufferPtr->getQuadTreeRoot());
-	while (!quadTreeStack.empty()) {
-		auto quadTree = quadTreeStack.top();
-		quadTreeStack.pop();
-		if (quadTree->containKDTree(kdTreeRoot)) {
-			quadTree->checkKDTree(kdTreeRoot, shader, bufferPtr);
-			for (int i = 0; i < 4; i++) {
-				auto child = quadTree->getChildren(i);
-				if (child) {
-					quadTreeStack.push(child);
-				}
-			}
-		}
-	}
+	kdTreeHierarchyBufferPtr->getQuadTreeRoot()->checkKDTree(kdTreeRoot, shader, bufferPtr);
 
 	auto end = std::chrono::high_resolution_clock::now();
 	const auto duration1 = std::chrono::duration_cast<std::chrono::milliseconds>(start - construct).count();

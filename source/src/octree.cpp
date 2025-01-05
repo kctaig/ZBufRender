@@ -1,11 +1,11 @@
 #include "octree.hpp"
 #include <numeric>
 
-Octree::Octree(const BBOX3d& bbox, const std::vector<std::shared_ptr<FragMesh>>& fragMeshesPtr) {
+Octree::Octree(const BBOX3d& bbox, const std::vector<std::shared_ptr<FragMesh>>& fragMeshesPtr, int level) {
 	bboxPtr = std::make_shared<BBOX3d>(bbox);
 	depth = bbox.minZ;
 
-	if (fragMeshesPtr.size() <= 1 || bbox.minX + 1 >= bbox.maxX || bbox.minY + 1 >= bbox.maxY) {
+	if (fragMeshesPtr.size() <= 1 || bbox.minX + 1 >= bbox.maxX || bbox.minY + 1 >= bbox.maxY || level >= 8) {
 		this->fragMeshesPtr = fragMeshesPtr;
 		return;
 	}
@@ -38,21 +38,21 @@ Octree::Octree(const BBOX3d& bbox, const std::vector<std::shared_ptr<FragMesh>>&
 	}
 
 	if (!childrenFragMeshes[0].empty())
-		children.push_back(std::make_shared<Octree>(leftDownFrontBBox, childrenFragMeshes[0]));
+		children.push_back(std::make_shared<Octree>(leftDownFrontBBox, childrenFragMeshes[0], level + 1));
 	if (!childrenFragMeshes[1].empty())
-		children.push_back(std::make_shared<Octree>(rightDownFrontBBox, childrenFragMeshes[1]));
+		children.push_back(std::make_shared<Octree>(rightDownFrontBBox, childrenFragMeshes[1], level + 1));
 	if (!childrenFragMeshes[2].empty())
-		children.push_back(std::make_shared<Octree>(leftUpFrontBBox, childrenFragMeshes[2]));
+		children.push_back(std::make_shared<Octree>(leftUpFrontBBox, childrenFragMeshes[2], level + 1));
 	if (!childrenFragMeshes[3].empty())
-		children.push_back(std::make_shared<Octree>(rightUpFrontBBox, childrenFragMeshes[3]));
+		children.push_back(std::make_shared<Octree>(rightUpFrontBBox, childrenFragMeshes[3], level + 1));
 	if (!childrenFragMeshes[4].empty())
-		children.push_back(std::make_shared<Octree>(leftDownBackBBox, childrenFragMeshes[4]));
+		children.push_back(std::make_shared<Octree>(leftDownBackBBox, childrenFragMeshes[4], level + 1));
 	if (!childrenFragMeshes[5].empty())
-		children.push_back(std::make_shared<Octree>(rightDownBackBBox, childrenFragMeshes[5]));
+		children.push_back(std::make_shared<Octree>(rightDownBackBBox, childrenFragMeshes[5], level + 1));
 	if (!childrenFragMeshes[6].empty())
-		children.push_back(std::make_shared<Octree>(leftUpBackBBox, childrenFragMeshes[6]));
+		children.push_back(std::make_shared<Octree>(leftUpBackBBox, childrenFragMeshes[6], level + 1));
 	if (!childrenFragMeshes[7].empty())
-		children.push_back(std::make_shared<Octree>(rightUpBackBBox, childrenFragMeshes[7]));
+		children.push_back(std::make_shared<Octree>(rightUpBackBBox, childrenFragMeshes[7], level + 1));
 
 	//updateOctreeDepth();
 }

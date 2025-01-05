@@ -1,6 +1,6 @@
 #include "shader.hpp"
 
-void vertexShader(std::vector<glm::vec4>& vertices, const Uniforms& uniforms) {
+void Shader::vs(std::vector<glm::vec4>& vertices, const Uniforms& uniforms) {
 	for (auto& vertex : vertices) {
 		auto clipPos = uniforms.projection * uniforms.view * uniforms.model * vertex;
 		// NDC pos
@@ -25,7 +25,7 @@ void vertexShader(std::vector<glm::vec4>& vertices, const Uniforms& uniforms) {
 	}
 }
 
-void fragmentShader(FragMesh& fragMesh, const Uniforms& uniforms) {
+void Shader::fs(FragMesh& fragMesh, const Uniforms& uniforms) {
 	auto normal = fragMesh.calculateV3dNormal();
 	fragMesh.color = (normal + 1.f) / 2.f;
 	//fragMesh.color = glm::vec3(1.f, 1.f, 1.f);

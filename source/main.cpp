@@ -20,8 +20,8 @@ int main() {
 	//const Application app{ 800, 600, REGULAR, std::move(modelPtr) };
 	//const Application app{ 800, 600, SCANLINE, std::move(modelPtr) };
 	//const Application app{ 800, 600, NAIVEHIZ, std::move(modelPtr) };
-	//const Application app{ 800, 600, OCTREEHIZ, std::move(modelPtr) };
-	const Application app{ 800, 600, KDTREEHIZ, std::move(modelPtr) };
+	const Application app{ 800, 600, OCTREEHIZ, std::move(modelPtr) };
+	//const Application app{ 800, 600, KDTREEHIZ, std::move(modelPtr) };
 
 	/****************************** end *******************************/
 

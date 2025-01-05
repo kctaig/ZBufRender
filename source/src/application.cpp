@@ -26,7 +26,7 @@ void Application::run() const {
 		/************************** render ***************************/
 		if (newScene) {
 			renderPtr->initFragMeshesPtr(*uniformsPtr, *shaderPtr);
-			//newScene = false;
+			newScene = false;
 		}
 
 		renderPtr->getBufferPtr()->clear(glm::vec3(0));
@@ -74,7 +74,7 @@ void Application::init(size_t width, size_t height, RasterType rasterType, std::
 
 	renderPtr = std::make_unique<Render>(std::move(modelPtr), cameraPtr, bufferPtr, rasterType);
 	windowPtr = std::make_unique<Window>(width, height, "ZBufRender");
-	shaderPtr = std::make_unique<Shader>(vertexShader, fragmentShader);
+	shaderPtr = std::make_unique<Shader>(Shader::vs, Shader::fs);
 	uniformsPtr = std::make_unique<Uniforms>();
 
 	Window::getContext().bufferPtr = bufferPtr.get();

@@ -6,7 +6,7 @@ KDTree::KDTree(const BBOX3d& bbox, const std::vector<std::shared_ptr<FragMesh>>&
 	this->bboxPtr = std::make_shared<BBOX3d>(bbox);
 	this->depth = bbox.minZ;
 
-	if (fragMeshPtr.size() <= 1 || split >= 10) {
+	if (fragMeshPtr.size() <= 1 || split >= 8) {
 		this->fragMeshPtr = fragMeshPtr;
 		return;
 	}
@@ -53,7 +53,7 @@ KDTree::KDTree(const BBOX3d& bbox, const std::vector<std::shared_ptr<FragMesh>>&
 		rightChild = std::make_shared<KDTree>(rightBbox, rightFragMeshPtr, split + 1);
 	}
 
-	//updateKDTreeDepth();
+	updateKDTreeDepth();
 }
 
 void KDTree::updateKDTreeDepth()
