@@ -19,6 +19,15 @@ bool BBOX::containBBox(const BBOX& subBBox) const {
 	return subBBox.minX >= minX && subBBox.minY >= minY && subBBox.maxX <= maxX && subBBox.maxY <= maxY;
 }
 
+bool BBOX::containPoint(glm::ivec2 point) const {
+	return point.x <= maxX && point.x >= minX && point.y <= maxY && point.y >= minY;
+}
+
+bool BBOX::intersectBBox(const BBOX& bbox) const
+{
+	return containPoint({ bbox.minX,bbox.minY }) || containPoint({ bbox.minX,bbox.maxY }) || containPoint({ bbox.maxX,bbox.minY }) || containPoint({ bbox.maxX,bbox.maxY });
+}
+
 /***************************************** 3d BBox ******************************************/
 
 BBOX3d::BBOX3d(const std::vector<glm::vec4>& screenVertices)

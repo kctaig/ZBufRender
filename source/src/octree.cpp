@@ -54,7 +54,7 @@ Octree::Octree(const BBOX3d& bbox, const std::vector<std::shared_ptr<FragMesh>>&
 	if (!childrenFragMeshes[7].empty())
 		children.push_back(std::make_shared<Octree>(rightUpBackBBox, childrenFragMeshes[7]));
 
-	updateOctreeDepth();
+	//updateOctreeDepth();
 }
 
 void Octree::updateOctreeDepth() {

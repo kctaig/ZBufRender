@@ -1,4 +1,5 @@
 #include "render.hpp"
+#include <stack>
 
 Render::Render(std::unique_ptr<Model> mPtr, std::shared_ptr<Camera> cPtr, std::shared_ptr<ZBuffer> fbPtr, RasterType type) {
 	modelPtr = std::move(mPtr);
@@ -140,4 +141,59 @@ void Render::octreeHierarchyRender(const Shader& shader,
 	const auto duration2 = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 	std::cout << "Octree Hierarchy ZBuffer Construct Time : " << duration1 << " ms" << std::endl;
 	std::cout << "Octree Hierarchy ZBuffer Rendering Time : " << duration2 << " ms" << std::endl;
+}
+
+void Render::kdTreeHierarchyRender(const Shader& shader, const Uniforms& uniforms) const
+{
+	auto kdTreeHierarchyBufferPtr = std::dynamic_pointer_cast<HierarchyZBuffer>(bufferPtr);
+	bufferPtr->clear(glm::vec3(0.f));
+	float minZ = FLT_MAX, maxZ = FLT_MIN;
+	int minX = INT_MAX, maxX = INT_MIN, minY = INT_MAX, maxY = INT_MIN;
+	for (auto& fragMeshPtr : fragMeshesPtr) {
+		minZ = std::min(minZ, fragMeshPtr->bbox.minZ);
+		maxZ = std::max(maxZ, fragMeshPtr->bbox.maxZ);
+		minX = std::min(minX, fragMeshPtr->bbox.minX);
+		maxX = std::max(maxX, fragMeshPtr->bbox.maxX);
+		minY = std::min(minY, fragMeshPtr->bbox.minY);
+		maxY = std::max(maxY, fragMeshPtr->bbox.maxY);
+	}
+
+	auto construct = std::chrono::high_resolution_clock::now();
+
+	//construct KDTree
+
+	//std::shared_ptr<KDTree> kdTreeRoot = std::make_shared<KDTree>(
+	//	BBOX3d{ 0, 0, minZ,
+	//		   static_cast<int>(bufferPtr->getWidth()),
+	//		   static_cast<int>(bufferPtr->getHeight()), maxZ },
+	//	fragMeshesPtr, 0);
+
+	std::shared_ptr<KDTree> kdTreeRoot = std::make_shared<KDTree>(BBOX3d{ minX, minY, minZ, maxX, maxY, maxZ }, fragMeshesPtr, 0);
+
+	auto start = std::chrono::high_resolution_clock::now();
+
+	// check KDTree
+	//kdTreeHierarchyBufferPtr->getQuadTreeRoot()->checkKDTree(kdTreeRoot, shader, bufferPtr);
+
+	std::stack<std::shared_ptr<QuadTree>> quadTreeStack;
+	quadTreeStack.push(kdTreeHierarchyBufferPtr->getQuadTreeRoot());
+	while (!quadTreeStack.empty()) {
+		auto quadTree = quadTreeStack.top();
+		quadTreeStack.pop();
+		if (quadTree->containKDTree(kdTreeRoot)) {
+			quadTree->checkKDTree(kdTreeRoot, shader, bufferPtr);
+			for (int i = 0; i < 4; i++) {
+				auto child = quadTree->getChildren(i);
+				if (child) {
+					quadTreeStack.push(child);
+				}
+			}
+		}
+	}
+
+	auto end = std::chrono::high_resolution_clock::now();
+	const auto duration1 = std::chrono::duration_cast<std::chrono::milliseconds>(start - construct).count();
+	const auto duration2 = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+	std::cout << "KDtree Hierarchy ZBuffer Construct Time : " << duration1 << " ms" << std::endl;
+	std::cout << "KDtree Hierarchy ZBuffer Rendering Time : " << duration2 << " ms" << std::endl;
 }

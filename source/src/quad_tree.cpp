@@ -52,6 +52,16 @@ bool QuadTree::containOctree(const std::shared_ptr<Octree> octreeRoot) const {
 	return bboxPtr->containBBox(*(octreeRoot->getBBoxPtr()));
 }
 
+bool QuadTree::containKDTree(const std::shared_ptr<KDTree> kdTreeRoot) const
+{
+	return bboxPtr->containBBox(*(kdTreeRoot->getBBoxPtr()));
+}
+
+bool QuadTree::intersectKDTree(const std::shared_ptr<KDTree> kdTreeRoot) const
+{
+	return bboxPtr->intersectBBox(*(kdTreeRoot->getBBoxPtr()));
+}
+
 void QuadTree::checkPixel(glm::ivec2 pixel, float pixelDepth, glm::vec3 color, std::shared_ptr<ZBuffer> bufferPtr) {
 	// 该像素已被消隐，无需被绘制
 	if (pixelDepth >= depth)
@@ -125,5 +135,26 @@ void QuadTree::checkOctree(std::shared_ptr<Octree> octreeRoot, const Shader& sha
 			}
 		}
 	}
+	updateQuadTreeDepth();
+}
+
+void QuadTree::checkKDTree(std::shared_ptr<KDTree> kdTreeRoot, const Shader& shader, std::shared_ptr<ZBuffer> bufferPtr)
+{
+	if (depth <= kdTreeRoot->getDepth())
+		return;
+
+	if (intersectKDTree(kdTreeRoot))
+	{
+		const auto& fragMeshesPtr = kdTreeRoot->getFragMeshesPtr();
+		for (const auto& fragMeshPtr : fragMeshesPtr) {
+			checkFragMesh(*fragMeshPtr, shader, bufferPtr);
+		}
+
+		for (const auto& kdTreeChild : { kdTreeRoot->getLeftChild(), kdTreeRoot->getRightChild() }) {
+			if (!kdTreeChild) continue;
+			checkKDTree(kdTreeChild, shader, bufferPtr);
+		}
+	}
+
 	updateQuadTreeDepth();
 }

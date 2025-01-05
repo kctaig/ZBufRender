@@ -13,7 +13,8 @@ enum RasterType {
 	REGULAR,
 	SCANLINE,
 	NAIVEHIZ,
-	OCTREEHIZ
+	OCTREEHIZ,
+	KDTREEHIZ
 };
 
 class Render {
@@ -35,6 +36,9 @@ public:
 		const Uniforms& uniforms) const;
 
 	void octreeHierarchyRender(const Shader& shader,
+		const Uniforms& uniforms) const;
+
+	void kdTreeHierarchyRender(const Shader& shader,
 		const Uniforms& uniforms) const;
 
 	auto getCameraPtr() const { return cameraPtr; }

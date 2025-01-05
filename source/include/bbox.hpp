@@ -19,6 +19,10 @@ struct BBOX {
 	void limitedToBBox(const BBOX& screenBBox);
 
 	bool containBBox(const BBOX& bbox) const;
+
+	bool intersectBBox(const BBOX& bbox) const;
+
+	bool containPoint(glm::ivec2 point) const;
 };
 
 struct BBOX3d : public BBOX {

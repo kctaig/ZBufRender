@@ -24,8 +24,7 @@ void Window::framebufferCallback(GLFWwindow* window, int width, int height) {
 void Window::processInput(GLFWwindow* window)
 {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-		//glfwSetWindowShouldClose(window, true);
-		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL); //  Õ∑≈ Û±Í
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	}
 	if (glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) {
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -89,7 +88,7 @@ void Window::init() {
 	glfwSetScrollCallback(window.get(), scrollCallback);
 
 	// tell GLFW to capture our mouse
-	//glfwSetInputMode(window.get(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	glfwSetInputMode(window.get(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	// glad: load all OpenGL function pointers
 	if (!gladLoadGLLoader(reinterpret_cast<GLADloadproc>(glfwGetProcAddress))) {
