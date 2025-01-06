@@ -9,3 +9,4 @@ cmake-build-release-visual-studio
 build
 out
 /CMakeSettings.json
+bin

@@ -13,7 +13,6 @@ add_executable(${TARGET_NAME} main.cpp ${SOURCE_FILES} ${HEADER_FILES}
 set(THIRD_PARTY_DIR "${CMAKE_SOURCE_DIR}/3rdparty")
 set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 set(GLM_INCLUDE "${THIRD_PARTY_DIR}/glm")
-#set(GLFW_ROOT "${THIRD_PARTY_DIR}/GLFW-VS2022")
 set(GLFW_INCLUDE "${THIRD_PARTY_DIR}/glfw/include")
 set(LOADER_INCLUDE "${THIRD_PARTY_DIR}/tinyobjloader")
 
