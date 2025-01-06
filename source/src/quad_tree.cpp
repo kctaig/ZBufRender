@@ -146,11 +146,9 @@ void QuadTree::checkKDTree(std::shared_ptr<KDTree> kdTreeRoot, const Shader& sha
 	if (intersectKDTree(kdTreeRoot))
 	{
 		// 如果当前节点是叶子节点，则绘制fragMesh
-		if (!kdTreeRoot->getLeftChild() && !kdTreeRoot->getRightChild()) {
-			const auto& fragMeshesPtr = kdTreeRoot->getFragMeshesPtr();
-			for (const auto& fragMeshPtr : fragMeshesPtr) {
-				checkFragMesh(*fragMeshPtr, shader, bufferPtr);
-			}
+		const auto& fragMeshesPtr = kdTreeRoot->getFragMeshesPtr();
+		for (const auto& fragMeshPtr : fragMeshesPtr) {
+			checkFragMesh(*fragMeshPtr, shader, bufferPtr);
 		}
 
 		for (const auto& kdTreeChild : { kdTreeRoot->getLeftChild(), kdTreeRoot->getRightChild() }) {

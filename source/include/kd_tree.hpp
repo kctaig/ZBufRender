@@ -15,7 +15,9 @@ public:
 
 	float getDepth() const { return depth; }
 	std::shared_ptr<BBOX3d> getBBoxPtr() const { return bboxPtr; }
+	std::shared_ptr<BBOX3d>& getBBoxPtr() { return bboxPtr; }
 	std::vector<std::shared_ptr<FragMesh>> getFragMeshesPtr() const { return fragMeshPtr; }
+	std::vector<std::shared_ptr<FragMesh>>& getFragMeshesPtr() { return fragMeshPtr; }
 	std::shared_ptr<KDTree> getLeftChild() const { return leftChild; }
 	std::shared_ptr<KDTree> getRightChild() const { return rightChild; }
 

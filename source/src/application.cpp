@@ -4,7 +4,7 @@ void Application::run() const {
 	float angle = 0.0f;
 	float angularSpeed = 20.0f;  // 每秒旋转20度
 	glm::vec3 rotationAxis = glm::vec3(0.0f, 1.0f, 0.0f); // 绕y轴旋转
-	bool newScene = true;
+	bool operation = true;
 	// render loop
 	while (!glfwWindowShouldClose(windowPtr->getWindowPtr())) {
 		const auto curFrame = static_cast<float>(glfwGetTime());
@@ -24,9 +24,9 @@ void Application::run() const {
 			renderPtr->getBufferPtr()->getHeight());
 
 		/************************** render ***************************/
-		if (newScene) {
+		if (operation) {
 			renderPtr->initFragMeshesPtr(*uniformsPtr, *shaderPtr);
-			newScene = false;
+			//operation = false;
 		}
 
 		renderPtr->getBufferPtr()->clear(glm::vec3(0));
