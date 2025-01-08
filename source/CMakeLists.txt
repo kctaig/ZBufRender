@@ -17,7 +17,7 @@ set(GLFW_INCLUDE "${THIRD_PARTY_DIR}/glfw/include")
 set(LOADER_INCLUDE "${THIRD_PARTY_DIR}/tinyobjloader")
 
 find_package(OpenGL REQUIRED)
-find_package(OpenMP REQUIRED)
+# find_package(OpenMP REQUIRED)
 
 target_link_libraries(${TARGET_NAME}
         PUBLIC
@@ -25,7 +25,7 @@ target_link_libraries(${TARGET_NAME}
         glm
         glad
         ${OPENGL_LIBRARIES}
-        OpenMP::OpenMP_CXX
+#        OpenMP::OpenMP_CXX
 )
 
 target_include_directories(${TARGET_NAME} PUBLIC ${THIRD_PARTY_DIR})
